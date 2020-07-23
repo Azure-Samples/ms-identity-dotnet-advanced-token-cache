@@ -1,6 +1,6 @@
-﻿using DataAccessLayer.Entities;
+﻿using IntegratedCacheUtils.Entities;
+using IntegratedCacheUtils.Stores;
 using Microsoft.AspNetCore.Authentication;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
@@ -8,12 +8,9 @@ using Microsoft.Identity.Client;
 using Microsoft.Identity.Web.TokenCacheProviders;
 using Microsoft.Identity.Web.TokenCacheProviders.Distributed;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 
-namespace DataAccessLayer
+namespace IntegratedCacheUtils
 {
     public class IntegratedTokenCacheAdapter : MsalDistributedTokenCacheAdapter
     {
@@ -29,7 +26,7 @@ namespace DataAccessLayer
 
         protected override async Task OnBeforeWriteAsync(TokenCacheNotificationArgs args)
         {
-            var accountActivity = new MsalAccountActivity(args.Account, args.SuggestedCacheKey);
+            var accountActivity = new MsalAccountActivity(args.Account);
             await UpsertActivity(accountActivity);
 
             await Task.FromResult(base.OnBeforeWriteAsync(args));
@@ -39,19 +36,12 @@ namespace DataAccessLayer
         {
             using (var scope = _scopeFactory.CreateScope())
             {
-                var _dbContext = scope.ServiceProvider.GetRequiredService<CacheDbContext>();
+                var _integratedTokenCacheStore = scope.ServiceProvider.GetRequiredService<IIntegratedTokenCacheStore>();
 
-                if (_dbContext.MsalAccountActivities.Count(x => x.CacheKey == accountActivity.CacheKey) != 0)
-                    _dbContext.Update(accountActivity);
-                else
-                    _dbContext.MsalAccountActivities.Add(accountActivity);
-
-                await _dbContext.SaveChangesAsync().ConfigureAwait(false);
+                await _integratedTokenCacheStore.UpsertMsalAccountActivity(accountActivity);
 
                 return accountActivity;
             }
-
-            
         }
     }
 

@@ -46,6 +46,9 @@ namespace BackgroundWorker
         public string ClientSecret { get; set; }
 
         public string TokenCacheDbConnStr { get; set; }
+        public string TokenCacheRedisConnStr { get; set; }
+
+        public string TokenCacheRedisInstaceName { get; set; }
 
         /// <summary>
         /// Reads the configuration from a json file

@@ -25,28 +25,18 @@ namespace WebApp.Controllers
             _tokenAcquisition = tokenAcquisition;
         }
 
-        public IActionResult Index()
-        {
-            return View();
-        }
-
         [AuthorizeForScopes(Scopes = new[] { Constants.ScopeUserRead })]
-        public async Task<IActionResult> Profile()
+        public async Task<IActionResult> Index()
         {
             GraphServiceClient graphClient = GetGraphServiceClient(new[] { Constants.ScopeUserRead });
 
             var me = await graphClient.Me.Request().GetAsync();
             ViewData["Me"] = me;
-            ViewData["Photo"] = null;
-            
+
             return View();
         }
 
-        public IActionResult Privacy()
-        {
-            return View();
-        }
-
+        [AllowAnonymous]
         [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
         public IActionResult Error()
         {

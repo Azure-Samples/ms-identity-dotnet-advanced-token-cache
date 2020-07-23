@@ -1,7 +1,4 @@
 ﻿using Microsoft.Identity.Client;
-using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace BackgroundWorker
 {
@@ -9,10 +6,8 @@ namespace BackgroundWorker
     {
         public MsalAccount() { }
 
-        public MsalAccount(string userName, string environment, string objectId, string tenantId)
+        public MsalAccount(string objectId, string tenantId)
         {
-            //Username = userName;
-            //Environment = environment;
             HomeAccountId = new AccountId($"{objectId}.{tenantId}", objectId, tenantId);
         }
 

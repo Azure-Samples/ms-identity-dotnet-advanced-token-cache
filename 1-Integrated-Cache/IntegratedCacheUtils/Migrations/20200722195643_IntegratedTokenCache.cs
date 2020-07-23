@@ -1,9 +1,9 @@
 ﻿using System;
 using Microsoft.EntityFrameworkCore.Migrations;
 
-namespace DataAccessLayer.Migrations
+namespace IntegratedCacheUtils.Migrations
 {
-    public partial class Init : Migration
+    public partial class IntegratedTokenCache : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
@@ -11,18 +11,15 @@ namespace DataAccessLayer.Migrations
                 name: "MsalAccountActivities",
                 columns: table => new
                 {
-                    CacheKey = table.Column<string>(nullable: false),
+                    AccountIdentifier = table.Column<string>(nullable: false),
                     AccountObjectId = table.Column<string>(nullable: true),
-                    AccountIdentifier = table.Column<string>(nullable: true),
                     AccountTenantId = table.Column<string>(nullable: true),
-                    Username = table.Column<string>(nullable: true),
-                    Environment = table.Column<string>(nullable: true),
                     LastActivity = table.Column<DateTime>(nullable: false),
-                    FailedToRefresh = table.Column<bool>(nullable: false)
+                    FailedToAcquireToken = table.Column<bool>(nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_MsalAccountActivities", x => x.CacheKey);
+                    table.PrimaryKey("PK_MsalAccountActivities", x => x.AccountIdentifier);
                 });
         }
 

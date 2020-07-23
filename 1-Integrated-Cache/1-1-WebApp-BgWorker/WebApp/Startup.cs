@@ -2,9 +2,9 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using DataAccessLayer;
-using DataAccessLayer.Entities;
-using DataAccessLayer.Repository;
+using IntegratedCacheUtils;
+using IntegratedCacheUtils.Entities;
+using IntegratedCacheUtils.Stores;
 using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Builder;
@@ -37,12 +37,14 @@ namespace WebApp
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddDbContext<CacheDbContext>(options => options.UseSqlServer(Configuration.GetConnectionString("TokenCacheDbConnStr")));
-            services.AddScoped<IMsalAccountActivityRepository, MsalAccountActivityRepository>();
+            // SQL SERVER STORE
+            services.AddDbContext<IntegratedTokenCacheDbContext>(options =>
+                options.UseSqlServer(Configuration.GetConnectionString("TokenCacheDbConnStr")));
+            services.AddScoped<IIntegratedTokenCacheStore, IntegratedSqlServerTokenCacheStore>();
 
-            services.AddSingleton<IMsalTokenCacheProvider, IntegratedTokenCacheAdapter>();
-            services.AddDistributedMemoryCache();
-            services.AddHttpContextAccessor();
+            // REDIS STORE
+            //services.AddScoped<IIntegratedTokenCacheStore>(x => 
+            //    new IntegratedRedisTokenCacheStore(Configuration.GetConnectionString("TokenCacheRedisConnStr")));
 
             services.Configure<CookiePolicyOptions>(options =>
             {
@@ -55,49 +57,27 @@ namespace WebApp
 
             services.AddAuthentication(OpenIdConnectDefaults.AuthenticationScheme)
                 .AddMicrosoftWebApp(Configuration)
-                .AddMicrosoftWebAppCallsWebApi(Configuration, new string[] { Constants.ScopeUserRead });
+                .AddMicrosoftWebAppCallsWebApi(Configuration, new string[] { Constants.ScopeUserRead })
+                .AddIntegratedUserTokenCache();
 
-                //.AddSignIn(options =>
-                //{
-                //    Configuration.Bind("AzureAD", options);
-                //    //options.Events.OnAuthorizationCodeReceived = async context =>
-                //    //{
-                //    //    var tokenAcquisition = context.HttpContext.RequestServices.GetRequiredService<ITokenAcquisition>();
-                //    //    var cacheProvider = context.HttpContext.RequestServices.GetRequiredService<IMsalTokenCacheProvider>();
-
-                //    //    var app = ConfidentialClientApplicationBuilder.Create(options.ClientId)
-                //    //                .WithAuthority(options.Authority)
-                //    //                .WithClientSecret(options.ClientSecret)
-                //    //                .Build();
-
-                //    //    await cacheProvider.InitializeAsync(app.UserTokenCache);
-
-                //    //    var account = (await app.GetAccountAsync(context.HttpContext.User.GetMsalAccountId()));
-
-                //    //    var accountActivity = new MsalAccountActivity(account, context.HttpContext.User.GetMsalAccountId());
-
-                //    //    var repo = context.HttpContext.RequestServices.GetRequiredService<IMsalAccountActivityRepository>();
-                //    //    await repo.UpsertActivity(accountActivity);
-                //    //};
-                //}, options => { Configuration.Bind("AzureAD", options); });
-
-            // Token acquisition service based on MSAL.NET
-            // and chosen token cache implementation
-            //services.AddWebAppCallsProtectedWebApi(Configuration, new string[] { Constants.ScopeUserRead });
-                //.AddDistributedTokenCaches();
-
+            // SQL SERVER DISTRIBUTED TOKEN CACHE
             services.AddDistributedSqlServerCache(options =>
             {
                 /*
                     dotnet tool install --global dotnet-sql-cache
-                    dotnet sql-cache create "Data Source=(localdb)\MSSQLLocalDB;Initial Catalog=MY_TOKEN_CACHE_DATABASE;Integrated Security=True;" dbo TokenCache    
+                    dotnet sql-cache create "Data Source=(localdb)\MSSQLLocalDB;Initial Catalog=MsalTokenCacheDatabase;Integrated Security=True;" dbo TokenCache    
                 */
                 options.ConnectionString = Configuration.GetConnectionString("TokenCacheDbConnStr");
                 options.SchemaName = "dbo";
                 options.TableName = "TokenCache";
             });
 
-            
+            // REDIS DISTRIBUTED TOKEN CACHE
+            //services.AddStackExchangeRedisCache(options =>
+            //{
+            //    options.Configuration = Configuration.GetConnectionString("TokenCacheRedisConnStr");
+            //    options.InstanceName = Configuration.GetConnectionString("TokenCacheRedisInstaceName");
+            //});
 
             services.AddControllersWithViews(options =>
             {
