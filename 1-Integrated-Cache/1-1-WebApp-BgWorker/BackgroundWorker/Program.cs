@@ -1,15 +1,11 @@
 ﻿using IntegratedCacheUtils;
-using IntegratedCacheUtils.Entities;
 using IntegratedCacheUtils.Stores;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Web.TokenCacheProviders;
 using Microsoft.Identity.Web.TokenCacheProviders.Distributed;
 using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -92,7 +88,6 @@ namespace BackgroundWorker
                 // For each record, hydrate an IAccount with the values saved on the table, and call AcquireTokenSilent for this account.
                 foreach (var account in accountsToAcquireToken)
                 {
-
                     var hydratedAccount = new MsalAccount
                     {
                         HomeAccountId = new AccountId(

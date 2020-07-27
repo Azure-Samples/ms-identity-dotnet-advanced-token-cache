@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using IntegratedCacheUtils;
-using IntegratedCacheUtils.Entities;
 using IntegratedCacheUtils.Stores;
 using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 using Microsoft.AspNetCore.Authorization;
@@ -19,8 +18,6 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Graph;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Web;
-using Microsoft.Identity.Web.TokenCacheProviders;
-using Microsoft.Identity.Web.TokenCacheProviders.Distributed;
 using Microsoft.Identity.Web.UI;
 
 namespace WebApp
