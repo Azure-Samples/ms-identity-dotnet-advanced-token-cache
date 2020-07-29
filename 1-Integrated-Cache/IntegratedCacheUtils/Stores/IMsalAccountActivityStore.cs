@@ -6,10 +6,11 @@ using System.Threading.Tasks;
 
 namespace IntegratedCacheUtils.Stores
 {
-    public interface IIntegratedTokenCacheStore
+    public interface IMsalAccountActivityStore
     {
         Task UpsertMsalAccountActivity(MsalAccountActivity msalAccountActivity);
-        Task<IEnumerable<MsalAccountActivity>> GetAllAccounts();
+        Task<IEnumerable<MsalAccountActivity>> GetMsalAccountActivitesSince(DateTime lastActivityDate);
+        Task<MsalAccountActivity> GetMsalAccountActivityForUser(string userPrincipalName);
         Task HandleIntegratedTokenAcquisitionFailure(MsalAccountActivity failedAccountActivity);
     }
 }

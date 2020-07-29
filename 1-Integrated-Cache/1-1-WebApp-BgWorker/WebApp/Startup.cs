@@ -37,11 +37,7 @@ namespace WebApp
             // SQL SERVER STORE
             services.AddDbContext<IntegratedTokenCacheDbContext>(options =>
                 options.UseSqlServer(Configuration.GetConnectionString("TokenCacheDbConnStr")));
-            services.AddScoped<IIntegratedTokenCacheStore, IntegratedSqlServerTokenCacheStore>();
-
-            // REDIS STORE
-            //services.AddScoped<IIntegratedTokenCacheStore>(x => 
-            //    new IntegratedRedisTokenCacheStore(Configuration.GetConnectionString("TokenCacheRedisConnStr")));
+            services.AddScoped<IMsalAccountActivityStore, SqlServerMsalAccountActivityStore>();
 
             services.Configure<CookiePolicyOptions>(options =>
             {
@@ -58,23 +54,23 @@ namespace WebApp
                 .AddIntegratedUserTokenCache();
 
             // SQL SERVER DISTRIBUTED TOKEN CACHE
-            services.AddDistributedSqlServerCache(options =>
-            {
-                /*
-                    dotnet tool install --global dotnet-sql-cache
-                    dotnet sql-cache create "Data Source=(localdb)\MSSQLLocalDB;Initial Catalog=MsalTokenCacheDatabase;Integrated Security=True;" dbo TokenCache    
-                */
-                options.ConnectionString = Configuration.GetConnectionString("TokenCacheDbConnStr");
-                options.SchemaName = "dbo";
-                options.TableName = "TokenCache";
-            });
+            //services.AddDistributedSqlServerCache(options =>
+            //{
+            //    /*
+            //        dotnet tool install --global dotnet-sql-cache
+            //        dotnet sql-cache create "Data Source=(localdb)\MSSQLLocalDB;Initial Catalog=MsalTokenCacheDatabase;Integrated Security=True;" dbo TokenCache    
+            //    */
+            //    options.ConnectionString = Configuration.GetConnectionString("TokenCacheDbConnStr");
+            //    options.SchemaName = "dbo";
+            //    options.TableName = "TokenCache";
+            //});
 
             // REDIS DISTRIBUTED TOKEN CACHE
-            //services.AddStackExchangeRedisCache(options =>
-            //{
-            //    options.Configuration = Configuration.GetConnectionString("TokenCacheRedisConnStr");
-            //    options.InstanceName = Configuration.GetConnectionString("TokenCacheRedisInstaceName");
-            //});
+            services.AddStackExchangeRedisCache(options =>
+            {
+                options.Configuration = Configuration.GetConnectionString("TokenCacheRedisConnStr");
+                options.InstanceName = Configuration.GetConnectionString("TokenCacheRedisInstaceName");
+            });
 
             services.AddControllersWithViews(options =>
             {

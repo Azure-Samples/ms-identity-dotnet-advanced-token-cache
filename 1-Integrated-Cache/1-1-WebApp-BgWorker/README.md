@@ -22,11 +22,11 @@ Then, a .NET Core console application that shares the same ClientId with the Web
 
 Pre-requisites:
 
-- To easily generate the token cache table in your database, please install the following tool using the **Developer Command Prompt for Visual Studio** (running as administrator): 
+- If you want to store the token cache on a **SQL Server database**, you can easily generate the token cache table by installing the following tool using the **Developer Command Prompt for Visual Studio** (running as administrator): 
     ```shell
     dotnet tool install --global dotnet-sql-cache
     ```
-- If you don't have a SQL Server database to be used in this sample, [please create one](https://docs.microsoft.com//sql/relational-databases/databases/create-a-database?view=sql-server-ver15). You can name it as you wish.   
+- If you don't have a SQL Server database to be used in this sample yet, [please create one](https://docs.microsoft.com//sql/relational-databases/databases/create-a-database?view=sql-server-ver15). You can name it as you wish.   
 
 ## Step 1: Clone the repository
 
@@ -88,13 +88,44 @@ Open the project in your IDE (like Visual Studio) to configure the code.
 6. Find the section for the `ConnectionStrings` and replace the value of the keys that are relevant to your scenario:
    - If you will use **SQL Server**, update the key `TokenCacheDbConnStr` with the database connection string.
    - If you will use **Redis**, update the key `TokenCacheRedisConnStr` with the Redis connection string, and the key `TokenCacheRedisInstaceName` with the the Redis instance name.
-  
-## Step 4: Run the sample
 
-// TODO
-// If SQL, run Migration and dotnet sql-cache create
-// Choose the IIntegratedTokenCacheStore implementation
-// Run WebApp first, sign in. Then, run BG
+## Step 4: Configure the SQL Server database
+
+>Note: You just need to apply the Entity Framework migrations once, when you are running the sample for the very first time.
+
+This sample uses a SQL Server to store the entity `MsalAccountActivity`, and by using [Entity Framework migrations](https://docs.microsoft.com/ef/core/managing-schemas/migrations/?tabs=dotnet-core-cli), you can create the entity table scheme in your database with few steps:
+
+1. On Visual Studio, open the **Package Manager Console** tab.
+2. On the **Default Project** dropdown, select `IntegratedCacheUtils`.
+3. On the console, execute the command `Update-Database`. 
+
+If your solution is building without errors and you have setup the database connection string, this script will create the table `MsalAccountActivities`. If you are not using Visual Studio, please [check how to apply Entity Framework migrations via CLI](https://docs.microsoft.com/ef/core/managing-schemas/migrations/applying?tabs=dotnet-core-cli).
+
+### Storing the token cache on the SQL Server database
+
+>NOTE: If you are storing the token cache on Redis, you can skip this step.
+
+If you want to store the token cache on your database as well, you must create the the token cache table before. To do so, open the **Developer Command Prompt for Visual Studio** (running as administrator) and run the following script, replacing the connection string value with your own:
+
+```shell
+dotnet sql-cache create "Data Source=<Your-DB-connection-string>" dbo <table-name-to-be-created>
+```
+
+Example:
+
+```shell
+dotnet sql-cache create "Data Source=(localdb)\MSSQLLocalDB;Initial Catalog=MsalTokenCacheDatabase;Integrated Security=True;" dbo TokenCache
+```
+
+## Step 5: Run the sample
+
+To populate the distributed token cache, and the entity `MsalAccountActivity`, the **WebApp must be executed first**. Open the WebApp on multiple browser tabs (you might want to open the tabs in incognito) and sign-in with multiple users. **Do not sign-out, otherwise their token cache will be deleted**.
+
+Once you have signed-in with at least 2 users, stop the WebApp project, **without signing them out** and execute the BackgroundWorker project.
+
+The background worker is returning all account activities that happened more than 5 minutes ago. You could either change the time interval or wait for it. 
+
+With all the accounts retrieved, the background worker will print those that got their token acquired successfully and those that failed. To test a failure scenario, you can sign-out one of the users in the WebApp, and execute the background worker again. 
 
 ## About The code
 
@@ -127,9 +158,9 @@ public class IntegratedTokenCacheAdapter : MsalDistributedTokenCacheAdapter
 }
 ```
 
-#### IIntegratedTokenCacheStore Interface
+#### IMsalAccountActivityStore Interface
 
-The `IIntegratedTokenCacheStore.cs` is an interface to decouple the `IntegratedTokenCacheAdapter.cs` from any specific storage source for the `MsalAccountActivity.cs` entity. Rather it be on a SQL Server database, Redis, etc, you can provide the persistent logic on the `UpsertActivity()` method and even extend the `MsalAccountActivity.cs` entity to add more properties that could be relevant to your user-case.
+The `IMsalAccountActivityStore.cs` is an interface to decouple the `IntegratedTokenCacheAdapter.cs` from any specific storage source for the `MsalAccountActivity.cs` entity. Rather it be a SQL Server, MySQL, Redis database, etc, you can provide the persistency logic on the `UpsertActivity()` method and even extend the `MsalAccountActivity.cs` entity to add more properties that could be relevant to your user-case.
 
 ### Web App project
 
@@ -170,7 +201,7 @@ services.AddStackExchangeRedisCache(options =>
     options.InstanceName = Configuration.GetConnectionString("TokenCacheRedisInstaceName");
 });
 ```
-And setup the Dependency Injection for the desired `IIntegratedTokenCacheStore` implementation. For instance:
+And setup the Dependency Injection for the desired `IMsalAccountActivityStore` implementation. For instance:
 
 Save `MsalAccountActivity.cs` entity on SQL Server: 
 ```c#
@@ -179,20 +210,13 @@ services.AddDbContext<IntegratedTokenCacheDbContext>(options =>
 services.AddScoped<IIntegratedTokenCacheStore, IntegratedSqlServerTokenCacheStore>();
 ```
 
-Or save `MsalAccountActivity.cs` entity on Redis:
-
-```c#
-services.AddScoped<IIntegratedTokenCacheStore>(x =>
-    new IntegratedRedisTokenCacheStore(Configuration.GetConnectionString("TokenCacheRedisConnStr")));
-```
-
 ### BackgroundWorker project
 
-The background worker application, needs to **use the same ApplicationId (ClientId) as the web app**, the same `IIntegratedTokenCacheStore` implementation as the web app, however it will use `MsalDistributedTokenCacheAdapter` for the token cache provider since we don't need to persist the `MsalAccountActivity.cs` entity in this project.
+The background worker application, needs to **use the same ApplicationId (ClientId) as the web app**, the same `IMsalAccountActivityStore` implementation as the web app, however it will use `MsalDistributedTokenCacheAdapter` for the token cache provider since we don't need to persist the `MsalAccountActivity.cs` entity in this project.
 
 The main tasks that the background worker application needs to perform in order to use the same token cache as the web app are:
 
-- Retrieve all `MsalAccountActivity` entities to acquire an access token for
+- Retrieve `MsalAccountActivity` entities to acquire an access token for
 - For each entity retrieved, hydrate a class that extends [`IAccount`](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/blob/master/src/client/Microsoft.Identity.Client/IAccount.cs)
 - Call `AcquireTokenSilent()` passing the hydrated [`IAccount`](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/blob/master/src/client/Microsoft.Identity.Client/IAccount.cs) as parameter.
 

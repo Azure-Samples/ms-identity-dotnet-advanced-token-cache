@@ -8,20 +8,29 @@ using System.Threading.Tasks;
 
 namespace IntegratedCacheUtils.Stores
 {
-    public class IntegratedSqlServerTokenCacheStore : IIntegratedTokenCacheStore
+    public class SqlServerMsalAccountActivityStore : IMsalAccountActivityStore
     {
         private IntegratedTokenCacheDbContext _dbContext;
 
-        public IntegratedSqlServerTokenCacheStore(IntegratedTokenCacheDbContext dbContext)
+        public SqlServerMsalAccountActivityStore(IntegratedTokenCacheDbContext dbContext)
         {
             _dbContext = dbContext;
         }
 
-        public async Task<IEnumerable<MsalAccountActivity>> GetAllAccounts()
+        public async Task<IEnumerable<MsalAccountActivity>> GetMsalAccountActivitesSince(DateTime lastActivityDate)
         {
             return await _dbContext.MsalAccountActivities
-                .Where(x => x.FailedToAcquireToken == false)
+                .Where(x => x.FailedToAcquireToken == false 
+                    && x.LastActivity <= lastActivityDate)
                 .ToListAsync();
+        }
+
+        public async Task<MsalAccountActivity> GetMsalAccountActivityForUser(string userPrincipalName)
+        {
+            return await _dbContext.MsalAccountActivities
+                            .Where(x => x.FailedToAcquireToken == false
+                                && x.UserPrincipalName == userPrincipalName)
+                            .FirstOrDefaultAsync();
         }
 
         public async Task HandleIntegratedTokenAcquisitionFailure(MsalAccountActivity failedAccountActivity)

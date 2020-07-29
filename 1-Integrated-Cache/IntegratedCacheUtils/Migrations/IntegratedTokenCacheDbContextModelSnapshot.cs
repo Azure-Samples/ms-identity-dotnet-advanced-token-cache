@@ -36,6 +36,9 @@ namespace IntegratedCacheUtils.Migrations
                     b.Property<DateTime>("LastActivity")
                         .HasColumnType("datetime2");
 
+                    b.Property<string>("UserPrincipalName")
+                        .HasColumnType("nvarchar(max)");
+
                     b.HasKey("AccountIdentifier");
 
                     b.ToTable("MsalAccountActivities");

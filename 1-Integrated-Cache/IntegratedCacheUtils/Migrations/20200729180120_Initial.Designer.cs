@@ -10,8 +10,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace IntegratedCacheUtils.Migrations
 {
     [DbContext(typeof(IntegratedTokenCacheDbContext))]
-    [Migration("20200722195643_IntegratedTokenCache")]
-    partial class IntegratedTokenCache
+    [Migration("20200729180120_Initial")]
+    partial class Initial
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -37,6 +37,9 @@ namespace IntegratedCacheUtils.Migrations
 
                     b.Property<DateTime>("LastActivity")
                         .HasColumnType("datetime2");
+
+                    b.Property<string>("UserPrincipalName")
+                        .HasColumnType("nvarchar(max)");
 
                     b.HasKey("AccountIdentifier");
 

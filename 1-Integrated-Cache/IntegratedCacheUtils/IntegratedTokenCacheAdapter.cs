@@ -36,7 +36,7 @@ namespace IntegratedCacheUtils
         {
             using (var scope = _scopeFactory.CreateScope())
             {
-                var _integratedTokenCacheStore = scope.ServiceProvider.GetRequiredService<IIntegratedTokenCacheStore>();
+                var _integratedTokenCacheStore = scope.ServiceProvider.GetRequiredService<IMsalAccountActivityStore>();
 
                 await _integratedTokenCacheStore.UpsertMsalAccountActivity(accountActivity);
 

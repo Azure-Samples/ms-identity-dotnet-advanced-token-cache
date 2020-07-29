@@ -14,7 +14,7 @@ namespace BackgroundWorker
     class Program
     {
         private static ServiceProvider _serviceProvider = null;
-        private static IIntegratedTokenCacheStore _integratedTokenCacheStore = null;
+        private static IMsalAccountActivityStore _msalAccountActivityStore = null;
         private static AuthenticationConfig config = AuthenticationConfig.ReadFromJsonFile("appsettings.json");
 
         static void Main(string[] args)
@@ -24,35 +24,35 @@ namespace BackgroundWorker
                 Console.WriteLine("Application started! \n");
 
                 // SQL SERVER CONFIG
-                _serviceProvider = new ServiceCollection()
-                    .AddLogging()
-                    .AddDistributedMemoryCache()
-                    .AddDistributedSqlServerCache(options =>
-                    {
-                        options.ConnectionString = config.TokenCacheDbConnStr;
-                        options.SchemaName = "dbo";
-                        options.TableName = "TokenCache";
-                    })
-                    .AddDbContext<IntegratedTokenCacheDbContext>(options => options.UseSqlServer(config.TokenCacheDbConnStr))
-                    .AddSingleton<IMsalTokenCacheProvider, MsalDistributedTokenCacheAdapter>()
-                    .AddScoped<IIntegratedTokenCacheStore, IntegratedSqlServerTokenCacheStore>()
-                    .BuildServiceProvider();
-
-                // REDIS CONFIG
                 //_serviceProvider = new ServiceCollection()
                 //    .AddLogging()
                 //    .AddDistributedMemoryCache()
-                //    .AddStackExchangeRedisCache(options =>
+                //    .AddDistributedSqlServerCache(options =>
                 //    {
-                //        options.Configuration = config.TokenCacheRedisConnStr;
-                //        options.InstanceName = config.TokenCacheRedisInstaceName;
+                //        options.ConnectionString = config.TokenCacheDbConnStr;
+                //        options.SchemaName = "dbo";
+                //        options.TableName = "TokenCache";
                 //    })
+                //    .AddDbContext<IntegratedTokenCacheDbContext>(options => options.UseSqlServer(config.TokenCacheDbConnStr))
                 //    .AddSingleton<IMsalTokenCacheProvider, MsalDistributedTokenCacheAdapter>()
-                //    .AddScoped<IIntegratedTokenCacheStore>(x =>
-                //        new IntegratedRedisTokenCacheStore(config.TokenCacheRedisConnStr))
+                //    .AddScoped<IMsalAccountActivityStore, SqlServerMsalAccountActivityStore>()
                 //    .BuildServiceProvider();
 
-                _integratedTokenCacheStore = _serviceProvider.GetRequiredService<IIntegratedTokenCacheStore>();
+                // REDIS CONFIG
+                _serviceProvider = new ServiceCollection()
+                    .AddLogging()
+                    .AddDistributedMemoryCache()
+                    .AddStackExchangeRedisCache(options =>
+                    {
+                        options.Configuration = config.TokenCacheRedisConnStr;
+                        options.InstanceName = config.TokenCacheRedisInstaceName;
+                    })
+                    .AddSingleton<IMsalTokenCacheProvider, MsalDistributedTokenCacheAdapter>()
+                    .AddDbContext<IntegratedTokenCacheDbContext>(options => options.UseSqlServer(config.TokenCacheDbConnStr))
+                    .AddScoped<IMsalAccountActivityStore, SqlServerMsalAccountActivityStore>()
+                    .BuildServiceProvider();
+
+                _msalAccountActivityStore = _serviceProvider.GetRequiredService<IMsalAccountActivityStore>();
 
                 while (true)
                 {
@@ -76,8 +76,12 @@ namespace BackgroundWorker
         {
             var scopes = new string[] { "User.Read" };
 
-            // Returns the MsalAccountActivities that you would like to acquire a token silently
-            var accountsToAcquireToken = await _integratedTokenCacheStore.GetAllAccounts();
+            // Return the MsalAccountActivities that you would like to acquire a token silently
+            var someTimeAgo = DateTime.Now.AddMinutes(-5);
+            var accountsToAcquireToken = await _msalAccountActivityStore.GetMsalAccountActivitesSince(someTimeAgo);
+
+            // Or you could also return the account activity of a particular user
+            //var userActivityAccount = await _msalAccountActivityStore.GetMsalAccountActivityForUser("User-UPN");
 
             if (accountsToAcquireToken != null)
             {
@@ -112,7 +116,7 @@ namespace BackgroundWorker
                          * The user of that account will have to access the web app to perform this interaction.
                          * Examples that could cause this: MFA requirement, token expired or revoked, token cache deleted, etc
                          */
-                        await _integratedTokenCacheStore.HandleIntegratedTokenAcquisitionFailure(account);
+                        await _msalAccountActivityStore.HandleIntegratedTokenAcquisitionFailure(account);
 
                         Console.ForegroundColor = ConsoleColor.Red;
                         Console.WriteLine($"Could not acquire token for account {account.AccountIdentifier}.");

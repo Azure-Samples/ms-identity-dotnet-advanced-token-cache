@@ -3,7 +3,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 namespace IntegratedCacheUtils.Migrations
 {
-    public partial class IntegratedTokenCache : Migration
+    public partial class Initial : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
@@ -14,6 +14,7 @@ namespace IntegratedCacheUtils.Migrations
                     AccountIdentifier = table.Column<string>(nullable: false),
                     AccountObjectId = table.Column<string>(nullable: true),
                     AccountTenantId = table.Column<string>(nullable: true),
+                    UserPrincipalName = table.Column<string>(nullable: true),
                     LastActivity = table.Column<DateTime>(nullable: false),
                     FailedToAcquireToken = table.Column<bool>(nullable: false)
                 },
