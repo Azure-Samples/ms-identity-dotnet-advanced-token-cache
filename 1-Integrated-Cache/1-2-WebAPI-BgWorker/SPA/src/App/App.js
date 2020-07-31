@@ -26,10 +26,12 @@ class App extends React.Component {
 
     callWebApi = () => {
         this.props.acquireToken(tokenRequest).then((response) => {
-            webApiService(webApiConfig.apiURI, response.accessToken, (response) => {
-                this.setState({profile: response});
-            }).catch(err => console.log(err));
-        });
+            if (response.accessToken) {
+                webApiService(webApiConfig.apiURI, response.accessToken, (response) => {
+                    this.setState({profile: response});
+                });
+            }
+        }).catch(err => console.log(err));
     }
     
     handleSignIn = () => {
@@ -55,6 +57,8 @@ class App extends React.Component {
                     }
                 </Navbar>
                 <div>
+                {
+                    this.props.account ?
                     <Card>
                         <Card.Header>Welcome {this.props.account ? this.props.account.username : "User"}</Card.Header>
                         <Card.Body>
@@ -76,7 +80,8 @@ class App extends React.Component {
                                 : null
                             }
                         </Card.Body>
-                    </Card>
+                    </Card> : null
+                }
                 </div>
             </div>
         );
