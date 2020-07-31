@@ -25,10 +25,10 @@ class App extends React.Component {
     }
 
     callWebApi = () => {
-        this.props.acquireToken(tokenRequest).then(() => {
-            webApiService(webApiConfig.apiURI, this.props.accessToken, (response) => {
+        this.props.acquireToken(tokenRequest).then((response) => {
+            webApiService(webApiConfig.apiURI, response.accessToken, (response) => {
                 this.setState({profile: response});
-            });
+            }).catch(err => console.log(err));
         });
     }
     
@@ -56,7 +56,7 @@ class App extends React.Component {
                 </Navbar>
                 <div>
                     <Card>
-                        <Card.Header>Welcome {this.state.profile ? this.state.profile.displayName : "User"}</Card.Header>
+                        <Card.Header>Welcome {this.props.account ? this.props.account.username : "User"}</Card.Header>
                         <Card.Body>
                             <Card.Title>User Profile</Card.Title>
                             <Card.Text>
@@ -73,7 +73,7 @@ class App extends React.Component {
                                         <ListGroup.Item>Country: {this.state.profile.country}</ListGroup.Item>
                                         <ListGroup.Item>City: {this.state.profile.city}</ListGroup.Item>
                                     </ListGroup>      
-                                    : null
+                                : null
                             }
                         </Card.Body>
                     </Card>
@@ -86,7 +86,6 @@ class App extends React.Component {
 App.propTypes = {
     account: PropTypes.object,
     error: PropTypes.string,
-    accessToken: PropTypes.string,
     isAuthenticated: PropTypes.bool,
     signIn: PropTypes.func.isRequired,
     signOut: PropTypes.func.isRequired,

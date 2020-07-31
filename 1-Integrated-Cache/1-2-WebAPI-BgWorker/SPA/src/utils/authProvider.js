@@ -13,10 +13,10 @@ export const isIE = () => {
     return msie || msie11;
 };
 
+const msalApp = new PublicClientApplication(msalConfig);
+
 // If you support IE, our recommendation is that you sign-in using Redirect flow
 const useRedirectFlow = isIE();
-
-const msalApp = new PublicClientApplication(msalConfig);
 
 export default WrappedComponent => class AuthProvider extends Component {
 
@@ -26,7 +26,6 @@ export default WrappedComponent => class AuthProvider extends Component {
         this.state = {
             account: null,
             error: null,
-            accessToken: null,
             username: null,
             isAuthenticated: false,
         };
@@ -41,6 +40,8 @@ export default WrappedComponent => class AuthProvider extends Component {
                     console.error(err);
                 });
         }
+
+        this.getAccounts();
     }
 
     getAccounts = () => {
@@ -55,9 +56,17 @@ export default WrappedComponent => class AuthProvider extends Component {
         } else if (currentAccounts.length > 1) {
             console.warn("Multiple accounts detected.");
             // Add choose account code here
-            this.setState({username: currentAccounts[0].username})
+            this.setState({
+                username: currentAccounts[0].username,
+                account: msalApp.getAccountByUsername(currentAccounts[0].username),
+                isAuthenticated: true,
+            });
         } else if (currentAccounts.length === 1) {
-            this.setState({username: currentAccounts[0].username})
+            this.setState({
+                username: currentAccounts[0].username,
+                account: msalApp.getAccountByUsername(currentAccounts[0].username),
+                isAuthenticated: true,
+            })
         }
     }
 
@@ -66,7 +75,6 @@ export default WrappedComponent => class AuthProvider extends Component {
         if (response !== null) {
             this.setState({
                 account: response.account,
-                accessToken: response.accessToken, 
                 username: response.account.username,
                 isAuthenticated: true,
             });
@@ -123,7 +131,6 @@ export default WrappedComponent => class AuthProvider extends Component {
                 {...this.props}
                 account = {this.state.account}
                 error = {this.state.error}
-                accessToken = {this.state.accessToken}
                 isAuthenticated = {this.state.isAuthenticated}
                 signIn = {() => this.signIn(useRedirectFlow)}
                 signOut = {() => this.signOut()}
