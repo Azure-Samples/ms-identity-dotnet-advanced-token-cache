@@ -3,8 +3,8 @@
 
 export const msalConfig = {
     auth: {
-        clientId: "280b56c5-087e-4544-9f0d-95967d9fc1fe",
-        authority: "https://login.microsoftonline.com/da0cc090-dd32-4d9f-984c-130b337f221c",
+        clientId: "Enter the Client Id (aka 'Application ID')",
+        authority: "Enter the Authority, e.g 'https://login.microsoftonline.com/{tid}'",
         redirectUri: "http://localhost:3000",
     },
     cache: {
@@ -15,8 +15,8 @@ export const msalConfig = {
 
 
 export const webApiConfig = {
-    apiURI: "https://localhost:44351/api/profile",
-    resourceScope: "api://292e9306-4fba-44f4-bd28-748f02934c1b/.default"
+    apiURI: "Enter the WebAPI URI, e.g. 'https://localhost:44351/api/profile'",
+    resourceScope: "Enter the API scopes as declared in the app registration 'Expose an Api' blade in the form of 'api://{client_id}/.default'"
 }
 
 /** 
