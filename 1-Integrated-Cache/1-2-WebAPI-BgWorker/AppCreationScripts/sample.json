@@ -13,6 +13,7 @@
       "Id": "service",
       "Name": "IntegratedWebApi-AdvancedToken",
       "Kind": "WebApi",
+      "Audience": "AzureADMyOrg",
       "HomePage": "https://localhost:44351/api/profile",
       "PasswordCredentials": "Auto",
       "RequiredResourcesAccess": [
@@ -31,6 +32,7 @@
       "Id": "client",
       "Name": "ProfileSPA-AdvancedToken",
       "Kind": "SinglePageApplication",
+      "Audience": "AzureADMyOrg",
       "HomePage": "http://localhost:3000",
       "ReplyUrls": "http://localhost:3000",
       "RequiredResourcesAccess": [

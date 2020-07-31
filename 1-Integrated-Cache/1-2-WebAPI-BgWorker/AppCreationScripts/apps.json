@@ -4,9 +4,9 @@
   */
 
   "Sample": {
-    "Title": "Using integrated token cache between web app and background worker",
+    "Title": "Using integrated token cache between web api and background worker",
     "Level": 400,
-    "Client": "ASP.NET Core Web App"
+    "Client": "ASP.NET Core Web Api"
   },
   "AppRegistrations": [
     {

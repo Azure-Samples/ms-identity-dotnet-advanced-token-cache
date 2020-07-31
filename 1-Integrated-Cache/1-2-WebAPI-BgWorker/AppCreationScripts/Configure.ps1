@@ -138,6 +138,73 @@ Function UpdateTextFile([string] $configFilePath, [System.Collections.HashTable]
     Set-Content -Path $configFilePath -Value $lines -Force
 }
 
+Function ReplaceInLine([string] $line, [string] $key, [string] $value)
+{
+    $index = $line.IndexOf($key)
+    if ($index -ige 0)
+    {
+        $index2 = $index+$key.Length
+        $line = $line.Substring(0, $index) + $value + $line.Substring($index2)
+    }
+    return $line
+}
+
+Function ReplaceInTextFile([string] $configFilePath, [System.Collections.HashTable] $dictionary)
+{
+    $lines = Get-Content $configFilePath
+    $index = 0
+    while($index -lt $lines.Length)
+    {
+        $line = $lines[$index]
+        foreach($key in $dictionary.Keys)
+        {
+            if ($line.Contains($key))
+            {
+                $lines[$index] = ReplaceInLine $line $key $dictionary[$key]
+            }
+        }
+        $index++
+    }
+
+    Set-Content -Path $configFilePath -Value $lines -Force
+}
+<#.Description
+   This function creates a new Azure AD scope (OAuth2Permission) with default and provided values
+#>  
+Function CreateScope( [string] $value, [string] $userConsentDisplayName, [string] $userConsentDescription, [string] $adminConsentDisplayName, [string] $adminConsentDescription)
+{
+    $scope = New-Object Microsoft.Open.AzureAD.Model.OAuth2Permission
+    $scope.Id = New-Guid
+    $scope.Value = $value
+    $scope.UserConsentDisplayName = $userConsentDisplayName
+    $scope.UserConsentDescription = $userConsentDescription
+    $scope.AdminConsentDisplayName = $adminConsentDisplayName
+    $scope.AdminConsentDescription = $adminConsentDescription
+    $scope.IsEnabled = $true
+    $scope.Type = "User"
+    return $scope
+}
+
+<#.Description
+   This function creates a new Azure AD AppRole with default and provided values
+#>  
+Function CreateAppRole([string] $types, [string] $name, [string] $description)
+{
+    $appRole = New-Object Microsoft.Open.AzureAD.Model.AppRole
+    $appRole.AllowedMemberTypes = New-Object System.Collections.Generic.List[string]
+    $typesArr = $types.Split(',')
+    foreach($type in $typesArr)
+    {
+        $appRole.AllowedMemberTypes.Add($type);
+    }
+    $appRole.DisplayName = $name
+    $appRole.Id = New-Guid
+    $appRole.IsEnabled = $true
+    $appRole.Description = $description
+    $appRole.Value = $name;
+    return $appRole
+}
+
 Set-Content -Value "<html><body><table>" -Path createdApps.html
 Add-Content -Value "<thead><tr><th>Application</th><th>AppId</th><th>Url in the Azure portal</th></tr></thead><tbody>" -Path createdApps.html
 
@@ -191,68 +258,169 @@ Function ConfigureApplications
     # Get the user running the script to add the user as the app owner
     $user = Get-AzureADUser -ObjectId $creds.Account.Id
 
-   # Create the webApp AAD application
-   Write-Host "Creating the AAD application (IntegratedWebApp-AdvancedToken)"
-   # Get a 2 years application key for the webApp Application
+   # Create the service AAD application
+   Write-Host "Creating the AAD application (IntegratedWebApi-AdvancedToken)"
+   # Get a 2 years application key for the service Application
    $pw = ComputePassword
    $fromDate = [DateTime]::Now;
    $key = CreateAppKey -fromDate $fromDate -durationInYears 2 -pw $pw
-   $webAppAppKey = $pw
+   $serviceAppKey = $pw
    # create the application 
-   $webAppAadApplication = New-AzureADApplication -DisplayName "IntegratedWebApp-AdvancedToken" `
-                                                  -HomePage "https://localhost:44321/" `
-                                                  -LogoutUrl "https://localhost:44321/signout-oidc" `
-                                                  -ReplyUrls "https://localhost:44321/signin-oidc" `
-                                                  -IdentifierUris "https://$tenantName/IntegratedWebApp-AdvancedToken" `
-                                                  -AvailableToOtherTenants $True `
-                                                  -PasswordCredentials $key `
-                                                  -PublicClient $False
+   $serviceAadApplication = New-AzureADApplication -DisplayName "IntegratedWebApi-AdvancedToken" `
+                                                   -HomePage "https://localhost:44351/api/profile" `
+                                                   -PasswordCredentials $key `
+                                                   -PublicClient $False
+   $serviceIdentifierUri = 'api://'+$serviceAadApplication.AppId
+   Set-AzureADApplication -ObjectId $serviceAadApplication.ObjectId -IdentifierUris $serviceIdentifierUri
 
    # create the service principal of the newly created application 
-   $currentAppId = $webAppAadApplication.AppId
-   $webAppServicePrincipal = New-AzureADServicePrincipal -AppId $currentAppId -Tags {WindowsAzureActiveDirectoryIntegratedApp}
+   $currentAppId = $serviceAadApplication.AppId
+   $serviceServicePrincipal = New-AzureADServicePrincipal -AppId $currentAppId -Tags {WindowsAzureActiveDirectoryIntegratedApp}
 
    # add the user running the script as an app owner if needed
-   $owner = Get-AzureADApplicationOwner -ObjectId $webAppAadApplication.ObjectId
+   $owner = Get-AzureADApplicationOwner -ObjectId $serviceAadApplication.ObjectId
    if ($owner -eq $null)
    { 
-        Add-AzureADApplicationOwner -ObjectId $webAppAadApplication.ObjectId -RefObjectId $user.ObjectId
-        Write-Host "'$($user.UserPrincipalName)' added as an application owner to app '$($webAppServicePrincipal.DisplayName)'"
+        Add-AzureADApplicationOwner -ObjectId $serviceAadApplication.ObjectId -RefObjectId $user.ObjectId
+        Write-Host "'$($user.UserPrincipalName)' added as an application owner to app '$($serviceServicePrincipal.DisplayName)'"
    }
 
+    # rename the access_as_user scope if it exists to match the readme steps or add a new scope
+    $scopes = New-Object System.Collections.Generic.List[Microsoft.Open.AzureAD.Model.OAuth2Permission]
+   
+    if ($scopes.Count -ge 0) 
+    {
+        # add all existing scopes first
+        $serviceAadApplication.Oauth2Permissions | foreach-object { $scopes.Add($_) }
 
-   Write-Host "Done creating the webApp application (IntegratedWebApp-AdvancedToken)"
+        $scope = $serviceAadApplication.Oauth2Permissions | Where-Object { $_.Value -eq "User_impersonation" }
+
+        if ($scope -ne $null) 
+        {
+            $scope.Value = "access_as_user"
+        }
+        else 
+        {
+            # Add scope
+            $scope = CreateScope -value "access_as_user"  `
+                -userConsentDisplayName "Access IntegratedWebApi-AdvancedToken"  `
+                -userConsentDescription "Allow the application to access IntegratedWebApi-AdvancedToken on your behalf."  `
+                -adminConsentDisplayName "Access IntegratedWebApi-AdvancedToken"  `
+                -adminConsentDescription "Allows the app to have the same access to information in the directory on behalf of the signed-in user."
+            
+            $scopes.Add($scope)
+        }        
+    }
+     
+    # add/update scopes
+    Set-AzureADApplication -ObjectId $serviceAadApplication.ObjectId -OAuth2Permission $scopes
+
+   Write-Host "Done creating the service application (IntegratedWebApi-AdvancedToken)"
 
    # URL of the AAD application in the Azure portal
-   # Future? $webAppPortalUrl = "https://portal.azure.com/#@"+$tenantName+"/blade/Microsoft_AAD_RegisteredApps/ApplicationMenuBlade/Overview/appId/"+$webAppAadApplication.AppId+"/objectId/"+$webAppAadApplication.ObjectId+"/isMSAApp/"
-   $webAppPortalUrl = "https://portal.azure.com/#blade/Microsoft_AAD_RegisteredApps/ApplicationMenuBlade/CallAnAPI/appId/"+$webAppAadApplication.AppId+"/objectId/"+$webAppAadApplication.ObjectId+"/isMSAApp/"
-   Add-Content -Value "<tr><td>webApp</td><td>$currentAppId</td><td><a href='$webAppPortalUrl'>IntegratedWebApp-AdvancedToken</a></td></tr>" -Path createdApps.html
+   # Future? $servicePortalUrl = "https://portal.azure.com/#@"+$tenantName+"/blade/Microsoft_AAD_RegisteredApps/ApplicationMenuBlade/Overview/appId/"+$serviceAadApplication.AppId+"/objectId/"+$serviceAadApplication.ObjectId+"/isMSAApp/"
+   $servicePortalUrl = "https://portal.azure.com/#blade/Microsoft_AAD_RegisteredApps/ApplicationMenuBlade/CallAnAPI/appId/"+$serviceAadApplication.AppId+"/objectId/"+$serviceAadApplication.ObjectId+"/isMSAApp/"
+   Add-Content -Value "<tr><td>service</td><td>$currentAppId</td><td><a href='$servicePortalUrl'>IntegratedWebApi-AdvancedToken</a></td></tr>" -Path createdApps.html
 
    $requiredResourcesAccess = New-Object System.Collections.Generic.List[Microsoft.Open.AzureAD.Model.RequiredResourceAccess]
 
-   # Add Required Resources Access (from 'webApp' to 'Microsoft Graph')
-   Write-Host "Getting access from 'webApp' to 'Microsoft Graph'"
+   # Add Required Resources Access (from 'service' to 'Microsoft Graph')
+   Write-Host "Getting access from 'service' to 'Microsoft Graph'"
    $requiredPermissions = GetRequiredPermissions -applicationDisplayName "Microsoft Graph" `
                                                 -requiredDelegatedPermissions "User.Read" `
 
    $requiredResourcesAccess.Add($requiredPermissions)
 
 
-   Set-AzureADApplication -ObjectId $webAppAadApplication.ObjectId -RequiredResourceAccess $requiredResourcesAccess
+   Set-AzureADApplication -ObjectId $serviceAadApplication.ObjectId -RequiredResourceAccess $requiredResourcesAccess
    Write-Host "Granted permissions."
 
-   # Update config file for 'webApp'
-   $configFile = $pwd.Path + "\..\WebApp\appsettings.json"
+   # Create the client AAD application
+   Write-Host "Creating the AAD application (ProfileSPA-AdvancedToken)"
+   # create the application 
+   $clientAadApplication = New-AzureADApplication -DisplayName "ProfileSPA-AdvancedToken" `
+                                                  -HomePage "http://localhost:3000" `
+                                                  -ReplyUrls "http://localhost:3000" `
+                                                  -IdentifierUris "https://$tenantName/ProfileSPA-AdvancedToken" `
+                                                  -PublicClient $False
+
+   # create the service principal of the newly created application 
+   $currentAppId = $clientAadApplication.AppId
+   $clientServicePrincipal = New-AzureADServicePrincipal -AppId $currentAppId -Tags {WindowsAzureActiveDirectoryIntegratedApp}
+
+   # add the user running the script as an app owner if needed
+   $owner = Get-AzureADApplicationOwner -ObjectId $clientAadApplication.ObjectId
+   if ($owner -eq $null)
+   { 
+        Add-AzureADApplicationOwner -ObjectId $clientAadApplication.ObjectId -RefObjectId $user.ObjectId
+        Write-Host "'$($user.UserPrincipalName)' added as an application owner to app '$($clientServicePrincipal.DisplayName)'"
+   }
+
+
+   Write-Host "Done creating the client application (ProfileSPA-AdvancedToken)"
+
+   # URL of the AAD application in the Azure portal
+   # Future? $clientPortalUrl = "https://portal.azure.com/#@"+$tenantName+"/blade/Microsoft_AAD_RegisteredApps/ApplicationMenuBlade/Overview/appId/"+$clientAadApplication.AppId+"/objectId/"+$clientAadApplication.ObjectId+"/isMSAApp/"
+   $clientPortalUrl = "https://portal.azure.com/#blade/Microsoft_AAD_RegisteredApps/ApplicationMenuBlade/CallAnAPI/appId/"+$clientAadApplication.AppId+"/objectId/"+$clientAadApplication.ObjectId+"/isMSAApp/"
+   Add-Content -Value "<tr><td>client</td><td>$currentAppId</td><td><a href='$clientPortalUrl'>ProfileSPA-AdvancedToken</a></td></tr>" -Path createdApps.html
+
+   $requiredResourcesAccess = New-Object System.Collections.Generic.List[Microsoft.Open.AzureAD.Model.RequiredResourceAccess]
+
+   # Add Required Resources Access (from 'client' to 'Microsoft Graph')
+   Write-Host "Getting access from 'client' to 'Microsoft Graph'"
+   $requiredPermissions = GetRequiredPermissions -applicationDisplayName "Microsoft Graph" `
+                                                -requiredDelegatedPermissions "User.Read" `
+
+   $requiredResourcesAccess.Add($requiredPermissions)
+
+   # Add Required Resources Access (from 'client' to 'service')
+   Write-Host "Getting access from 'client' to 'service'"
+   $requiredPermissions = GetRequiredPermissions -applicationDisplayName "IntegratedWebApi-AdvancedToken" `
+                                                -requiredDelegatedPermissions "access_as_user" `
+
+   $requiredResourcesAccess.Add($requiredPermissions)
+
+
+   Set-AzureADApplication -ObjectId $clientAadApplication.ObjectId -RequiredResourceAccess $requiredResourcesAccess
+   Write-Host "Granted permissions."
+
+   # Configure known client applications for service 
+   Write-Host "Configure known client applications for the 'service'"
+   $knowApplications = New-Object System.Collections.Generic.List[System.String]
+    $knowApplications.Add($clientAadApplication.AppId)
+   Set-AzureADApplication -ObjectId $serviceAadApplication.ObjectId -KnownClientApplications $knowApplications
+   Write-Host "Configured."
+
+
+   # Update config file for 'service'
+   $configFile = $pwd.Path + "\..\WebAPI\appsettings.json"
    Write-Host "Updating the sample code ($configFile)"
-   $dictionary = @{ "ClientId" = $webAppAadApplication.AppId;"TenantId" = $tenantId;"Domain" = $tenantName;"ClientSecret" = $webAppAppKey };
+   $dictionary = @{ "Domain" = $tenantName;"TenantId" = $tenantId;"ClientId" = $serviceAadApplication.AppId;"ClientSecret" = $serviceAppKey };
    UpdateTextFile -configFilePath $configFile -dictionary $dictionary
 
-   # Update config file for 'webApp'
+   # Update config file for 'client'
+   $configFile = $pwd.Path + "\..\SPA\src\utils\authConfig.js"
+   Write-Host "Updating the sample code ($configFile)"
+   $dictionary = @{ "Enter the Client Id (aka 'Application ID')" = $clientAadApplication.AppId;"Enter the Authority, e.g 'https://login.microsoftonline.com/{tid}'" = ('https://login.microsoftonline.com/'+ $tenantId);"Enter the API scopes as declared in the app registration 'Expose an Api' blade in the form of 'api://{client_id}/.default'" = ("api://"+$serviceAadApplication.AppId+"/.default");"Enter the WebAPI URI, e.g. 'https://localhost:44351/api/profile'" = $serviceAadApplication.HomePage };
+   ReplaceInTextFile -configFilePath $configFile -dictionary $dictionary
+
+   # Update config file for 'service'
    $configFile = $pwd.Path + "\..\BackgroundWorker\appsettings.json"
    Write-Host "Updating the sample code ($configFile)"
-   $dictionary = @{ "ClientId" = $webAppAadApplication.AppId;"TenantId" = $tenantId;"Domain" = $tenantName;"ClientSecret" = $webAppAppKey };
+   $dictionary = @{ "ClientId" = $serviceAadApplication.AppId;"TenantId" = $tenantId;"Domain" = $tenantName;"ClientSecret" = $serviceAppKey };
    UpdateTextFile -configFilePath $configFile -dictionary $dictionary
-  
+   Write-Host ""
+   Write-Host -ForegroundColor Green "------------------------------------------------------------------------------------------------" 
+   Write-Host "IMPORTANT: Please follow the instructions below to complete a few manual step(s) in the Azure portal":
+   Write-Host "- For 'service'"
+   Write-Host "  - Navigate to '$servicePortalUrl'"
+   Write-Host "  - Navigate to the IntegratedWebApi-AdvancedToken Manifest page, find the entry for 'KnownClientApplications' and add the clientId of ProfileSPA." -ForegroundColor Red 
+   Write-Host "- For 'client'"
+   Write-Host "  - Navigate to '$clientPortalUrl'"
+   Write-Host "  - Navigate to the IntegratedWebApi-AdvancedToken App Registration page, delete the Web platform and add the Single-page application. It cannot have both!" -ForegroundColor Red 
+
+   Write-Host -ForegroundColor Green "------------------------------------------------------------------------------------------------" 
+     
    Add-Content -Value "</tbody></table></body></html>" -Path createdApps.html  
 }
 
