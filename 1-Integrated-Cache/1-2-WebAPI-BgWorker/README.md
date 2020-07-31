@@ -278,9 +278,9 @@ Once `npm install` is completed, you can run the SPA with the command:
 npm start
 ```
 
-Open the SPA on multiple browser tabs (you might want to open the tabs in incognito) and sign-in with multiple users. **Do not sign-out, otherwise their token cache will be deleted**.
+Open the SPA on multiple browser tabs (you might want to open the tabs in incognito) and sign-in with multiple users.
 
-Once you have signed-in with at least 2 users you can stop both SPA and WebAPI projects, **without signing the users out**. Then, execute the BackgroundWorker project.
+Once you have signed-in with at least 2 users you can stop both SPA and WebAPI projects, and execute the BackgroundWorker project.
 
 The background worker is returning all account activities that happened more than 1 minutes ago. You could either change the time interval or wait for it. 
 
