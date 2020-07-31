@@ -56,6 +56,7 @@ namespace BackgroundWorker
                 _msalAccountActivityStore = _serviceProvider.GetRequiredService<IMsalAccountActivityStore>();
 
                 RunAsync().GetAwaiter().GetResult();
+
             }
             catch (Exception ex)
             {
@@ -79,7 +80,7 @@ namespace BackgroundWorker
             // Or you could also return the account activity of a particular user
             //var userActivityAccount = await _msalAccountActivityStore.GetMsalAccountActivityForUser("User-UPN");
 
-            if(accountsToAcquireToken == null || accountsToAcquireToken.Count() == 0)
+            if (accountsToAcquireToken == null || accountsToAcquireToken.Count() == 0)
             {
                 Console.ForegroundColor = ConsoleColor.Red;
                 Console.WriteLine($"No accounts returned");
@@ -109,7 +110,7 @@ namespace BackgroundWorker
                         var result = await app.AcquireTokenSilent(scopes, hydratedAccount)
                             .ExecuteAsync()
                             .ConfigureAwait(false);
-                        
+
                         Console.WriteLine($"Token acquired for account: {account.UserPrincipalName}");
                         Console.WriteLine($"Access token preview: {result.AccessToken.Substring(0, 70)} ...");
                         Console.WriteLine("  <------------------------>  ");

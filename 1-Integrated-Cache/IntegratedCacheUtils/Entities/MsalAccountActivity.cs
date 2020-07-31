@@ -14,8 +14,8 @@ namespace IntegratedCacheUtils.Entities
 
         public MsalAccountActivity(IAccount account)
         {
-            AccountObjectId = account.HomeAccountId.ObjectId;
             AccountIdentifier = account.HomeAccountId.Identifier;
+            AccountObjectId = account.HomeAccountId.ObjectId;
             AccountTenantId = account.HomeAccountId.TenantId;
             UserPrincipalName = account.Username;
             LastActivity = DateTime.Now;
