@@ -26,7 +26,7 @@ namespace IntegratedCacheUtils
 
         protected override async Task OnBeforeWriteAsync(TokenCacheNotificationArgs args)
         {
-            var accountActivity = new MsalAccountActivity(args.Account);
+            var accountActivity = new MsalAccountActivity(args.SuggestedCacheKey, args.Account);
             await UpsertActivity(accountActivity);
 
             await Task.FromResult(base.OnBeforeWriteAsync(args));

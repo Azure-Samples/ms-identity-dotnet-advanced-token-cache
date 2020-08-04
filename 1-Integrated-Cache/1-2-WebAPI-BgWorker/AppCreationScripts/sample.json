@@ -21,11 +21,6 @@
           "Resource": "Microsoft Graph",
           "DelegatedPermissions": [ "User.Read" ]
         }
-      ],
-      "ManualSteps": [
-        {
-          "Comment": "Navigate to the IntegratedWebApi-AdvancedToken Manifest page, find the entry for 'KnownClientApplications' and add the clientId of ProfileSPA."
-        }
       ]
     },
     {

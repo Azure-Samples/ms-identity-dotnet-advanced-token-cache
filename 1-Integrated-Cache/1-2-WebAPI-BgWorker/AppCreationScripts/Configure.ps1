@@ -412,9 +412,6 @@ Function ConfigureApplications
    Write-Host ""
    Write-Host -ForegroundColor Green "------------------------------------------------------------------------------------------------" 
    Write-Host "IMPORTANT: Please follow the instructions below to complete a few manual step(s) in the Azure portal":
-   Write-Host "- For 'service'"
-   Write-Host "  - Navigate to '$servicePortalUrl'"
-   Write-Host "  - Navigate to the IntegratedWebApi-AdvancedToken Manifest page, find the entry for 'KnownClientApplications' and add the clientId of ProfileSPA." -ForegroundColor Red 
    Write-Host "- For 'client'"
    Write-Host "  - Navigate to '$clientPortalUrl'"
    Write-Host "  - Navigate to the IntegratedWebApi-AdvancedToken App Registration page, delete the Web platform and add the Single-page application. It cannot have both!" -ForegroundColor Red 

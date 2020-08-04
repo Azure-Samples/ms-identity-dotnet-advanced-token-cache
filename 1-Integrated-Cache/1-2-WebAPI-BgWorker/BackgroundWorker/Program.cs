@@ -1,7 +1,9 @@
 ﻿using IntegratedCacheUtils;
 using IntegratedCacheUtils.Stores;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Options;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Web.TokenCacheProviders;
 using Microsoft.Identity.Web.TokenCacheProviders.Distributed;
@@ -35,7 +37,7 @@ namespace BackgroundWorker
                         options.TableName = "TokenCache";
                     })
                     .AddDbContext<IntegratedTokenCacheDbContext>(options => options.UseSqlServer(config.TokenCacheDbConnStr))
-                    .AddSingleton<IMsalTokenCacheProvider, MsalDistributedTokenCacheAdapter>()
+                    //.AddSingleton<IMsalTokenCacheProvider, BackgroundWorkerTokenCacheAdapter>()
                     .AddScoped<IMsalAccountActivityStore, SqlServerMsalAccountActivityStore>()
                     .BuildServiceProvider();
 
@@ -92,11 +94,17 @@ namespace BackgroundWorker
                 Console.WriteLine($"Trying to acquire token silently for {accountsToAcquireToken.Count()} activities...");
                 Console.Write(Environment.NewLine);
 
-                IConfidentialClientApplication app = await GetConfidentialClientApplication(config);
+                IConfidentialClientApplication app = GetConfidentialClientApplication(config);
 
                 // For each record, hydrate an IAccount with the values saved on the table, and call AcquireTokenSilent for this account.
                 foreach (var account in accountsToAcquireToken)
                 {
+                    var msalCache = new BackgroundWorkerTokenCacheAdapter(account.AccountCacheKey,
+                        _serviceProvider.GetService<IDistributedCache>(),
+                        _serviceProvider.GetService<IOptions<MsalDistributedTokenCacheAdapterOptions>>());
+
+                    await msalCache.InitializeAsync(app.UserTokenCache);
+
                     var hydratedAccount = new MsalAccount
                     {
                         HomeAccountId = new AccountId(
@@ -144,16 +152,16 @@ namespace BackgroundWorker
             Console.ResetColor();
         }
 
-        private static async Task<IConfidentialClientApplication> GetConfidentialClientApplication(AuthenticationConfig config)
+        private static IConfidentialClientApplication GetConfidentialClientApplication(AuthenticationConfig config)
         {
             var app = ConfidentialClientApplicationBuilder.Create(config.ClientId)
                 .WithClientSecret(config.ClientSecret)
                 .WithAuthority(new Uri(config.Authority))
                 .Build();
 
-            var msalCache = _serviceProvider.GetService<IMsalTokenCacheProvider>();
+            //var msalCache = _serviceProvider.GetService<IMsalTokenCacheProvider>();
 
-            await msalCache.InitializeAsync(app.UserTokenCache);
+            //await msalCache.InitializeAsync(app.UserTokenCache);
 
             return app;
         }

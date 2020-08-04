@@ -15,14 +15,17 @@ namespace IntegratedCacheUtils.Migrations
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "3.1.1")
+                .HasAnnotation("ProductVersion", "3.1.6")
                 .HasAnnotation("Relational:MaxIdentifierLength", 128)
                 .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
             modelBuilder.Entity("IntegratedCacheUtils.Entities.MsalAccountActivity", b =>
                 {
-                    b.Property<string>("AccountIdentifier")
+                    b.Property<string>("AccountCacheKey")
                         .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("AccountIdentifier")
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("AccountObjectId")
                         .HasColumnType("nvarchar(max)");
@@ -39,7 +42,7 @@ namespace IntegratedCacheUtils.Migrations
                     b.Property<string>("UserPrincipalName")
                         .HasColumnType("nvarchar(max)");
 
-                    b.HasKey("AccountIdentifier");
+                    b.HasKey("AccountCacheKey");
 
                     b.ToTable("MsalAccountActivities");
                 });
