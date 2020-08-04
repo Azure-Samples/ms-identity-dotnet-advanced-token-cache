@@ -8,7 +8,7 @@ service: Microsoft Graph
 endpoint: Microsoft identity platform
 ---
 
-# Using an integrated token cache between a web app and a background worker
+# Sharing the MSAL token cache between a web app and a background console worker app
 
 ## Scenario
 
@@ -22,11 +22,13 @@ Then, a .NET Core console application that shares the same ClientId with the Web
 
 Pre-requisites:
 
-- If you want to store the token cache on a **SQL Server database**, you can easily generate the token cache table by installing the following tool using the **Developer Command Prompt for Visual Studio** (running as administrator): 
+- If you want to store the token cache on a **SQL Server database**, you can easily generate the token cache table by installing the following tool using the **Developer Command Prompt for Visual Studio** (running as administrator):
+
     ```shell
     dotnet tool install --global dotnet-sql-cache
     ```
-- If you don't have a SQL Server database to be used in this sample yet, [please create one](https://docs.microsoft.com//sql/relational-databases/databases/create-a-database?view=sql-server-ver15). You can name it as you wish.   
+
+- If you don't have a SQL Server database to be used in this sample yet, [please create one](https://docs.microsoft.com//sql/relational-databases/databases/create-a-database?view=sql-server-ver15). You can name it as you wish.
 
 ## Step 1: Clone the repository
 
