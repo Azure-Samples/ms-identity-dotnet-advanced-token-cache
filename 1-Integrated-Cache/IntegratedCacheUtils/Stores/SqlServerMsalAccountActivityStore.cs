@@ -42,7 +42,7 @@ namespace IntegratedCacheUtils.Stores
 
         public async Task UpsertMsalAccountActivity(MsalAccountActivity msalAccountActivity)
         {
-            if (_dbContext.MsalAccountActivities.Count(x => x.AccountIdentifier == msalAccountActivity.AccountIdentifier) != 0)
+            if (_dbContext.MsalAccountActivities.Count(x => x.AccountCacheKey == msalAccountActivity.AccountCacheKey) != 0)
                 _dbContext.Update(msalAccountActivity);
             else
                 _dbContext.MsalAccountActivities.Add(msalAccountActivity);
