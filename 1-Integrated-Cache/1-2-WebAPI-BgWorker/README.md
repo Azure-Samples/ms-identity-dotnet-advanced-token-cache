@@ -243,6 +243,19 @@ Example:
 dotnet sql-cache create "Data Source=(localdb)\MSSQLLocalDB;Initial Catalog=MsalTokenCacheDatabase;Integrated Security=True;" dbo TokenCache
 ```
 
+### Storing the token cache on Redis
+
+>NOTE: If you are storing the token cache on SQL Server, you can skip this step.
+
+If you are storing the distributed token cache on Redis, you will need to modify the *BackgroundWorker* `Program.cs` file, and *WebAPI* `Startup.cs` file:
+
+- Open the file `Program.cs`
+  - Comment the section named **SQL SERVER CONFIG**
+  - Uncomment the section named **REDIS CONFIG**
+- Open the file `Startup.cs`
+  - Comment the section named **SQL SERVER CONFIG**
+  - Uncomment the section named **REDIS CONFIG**
+
 ## Step 5: Run the sample
 
 To populate the distributed token cache, and the entity `MsalAccountActivity`, the **SPA and WebApi must be executed first**. 
@@ -274,7 +287,7 @@ Once `npm install` is completed, you can run the SPA with the command:
 npm start
 ```
 
-Open the SPA on multiple browser tabs (you might want to open the tabs in incognito) and sign-in with multiple users.
+Open the SPA on multiple browser tabs (you might want to open the tabs in incognito), sign-in with multiple users and click on the **Call Web API** button.
 
 Once you have signed-in with at least 2 users you can stop both SPA and WebAPI projects, and execute the BackgroundWorker project.
 
