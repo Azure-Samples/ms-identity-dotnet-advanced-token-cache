@@ -1,0 +1,121 @@
+{
+  "Sample": {
+    "Title": "Using integrated token cache between web api and background worker",
+    "Level": 400,
+    "Client": "ASP.NET Core Web Api",
+    "Service": "Microsoft Graph",
+    "RepositoryUrl": "ms-identity-dotnet-advanced-token-cache",
+    "Endpoint": "AAD v2.0"
+  },
+
+  "AADApps": [
+    {
+      "Id": "service",
+      "Name": "IntegratedWebApi-AdvancedToken",
+      "Kind": "WebApi",
+      "Audience": "AzureADMyOrg",
+      "HomePage": "https://localhost:44351/api/profile",
+      "PasswordCredentials": "Auto",
+      "RequiredResourcesAccess": [
+        {
+          "Resource": "Microsoft Graph",
+          "DelegatedPermissions": [ "User.Read" ]
+        }
+      ]
+    },
+    {
+      "Id": "client",
+      "Name": "ProfileSPA-AdvancedToken",
+      "Kind": "SinglePageApplication",
+      "Audience": "AzureADMyOrg",
+      "HomePage": "http://localhost:3000",
+      "ReplyUrls": "http://localhost:3000",
+      "RequiredResourcesAccess": [
+        {
+          "Resource": "Microsoft Graph",
+          "DelegatedPermissions": [ "User.Read" ]
+        },
+        {
+					"Resource": "service",
+					"DelegatedPermissions": [ "access_as_user" ]
+				}
+      ],
+      "ManualSteps": [
+        {
+          "Comment": "Navigate to the IntegratedWebApi-AdvancedToken App Registration page, delete the Web platform and add the Single-page application. It cannot have both!"
+        }
+      ]
+    }
+  ],
+  "CodeConfiguration": [
+    {
+      "App": "service",
+      "SettingKind": "Text",
+      "SettingFile": "\\..\\WebAPI\\appsettings.json",
+      "Mappings": [
+        {
+          "key": "Domain",
+          "value": "$tenantName"
+        },
+        {
+          "key": "TenantId",
+          "value": "$tenantId"
+        },
+        {
+          "key": "ClientId",
+          "value": "service.AppId"
+        },
+        {
+          "key": "ClientSecret",
+          "value": "service.AppKey"
+        }
+      ]
+    },
+    {
+      "App": "client",
+      "SettingKind": "Replace",
+      "SettingFile": "\\..\\SPA\\src\\utils\\authConfig.js",
+      "Mappings": [
+        {
+          "key": "Enter the Client Id (aka 'Application ID')",
+          "value": "client.AppId"
+        },
+        {
+          "key": "Enter the Authority, e.g 'https://login.microsoftonline.com/{tid}'",
+          "value": "('https://login.microsoftonline.com/'+ $tenantId)"
+        },
+        {
+          "key": "Enter the API scopes as declared in the app registration 'Expose an Api' blade in the form of 'api://{client_id}/.default'",
+          "value": "service.ScopeDefault"
+        },
+        {
+          "key": "Enter the WebAPI URI, e.g. 'https://localhost:44351/api/profile'",
+          "value": "service.HomePage"
+        }
+      ]
+    },
+    {
+      "App": "service",
+      "SettingKind": "Text",
+      "SettingFile": "\\..\\BackgroundWorker\\appsettings.json",
+      "Mappings": [
+        {
+          "key": "ClientId",
+          "value": ".AppId"
+        },
+        {
+          "key": "TenantId",
+          "value": "$tenantId"
+        },
+        {
+          "key": "Domain",
+          "value": "$tenantName"
+        },
+        {
+          "key": "ClientSecret",
+          "value": ".AppKey"
+        }
+      ]
+    }
+  ]
+}

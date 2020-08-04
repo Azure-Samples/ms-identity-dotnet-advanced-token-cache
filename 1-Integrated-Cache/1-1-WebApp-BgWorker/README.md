@@ -131,36 +131,7 @@ With all the accounts retrieved, the background worker will print those that got
 
 ### IntegratedCacheUtils project
 
-The `IntegratedCacheUtils` project contains useful classes to achieve a token cache integration between a web app and a background worker. 
-
-#### MsalAccountActivity Entity
-
-While the web app has a user session that can be used to distinguish who's cached token belongs to whom, the background worker doesn't have this user session concept. To facilitate this link between a user and their cache on the background worker project, we have the entity, `MsalAccountActivity.cs`, that holds enough information to create this link.
-
-#### IntegratedTokenCacheAdapter Extension
-
-The NuGet package, [`Microsoft.Identity.Web`](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/wiki), provides many token cache adapters to be used out of the box, and one of them is the `MsalDistributedTokenCacheAdapter`. This adapter is designed to leverage the .NET distributed token cache library, and we will use it on both web app and background worker project.
-
-For the web app project, however, we would like to extend the `MsalDistributedTokenCacheAdapter` and override the method `OnBeforeWriteAsync()` to hydrate and persist the entity `MsalAccountActivity.cs` so the background worker can use each account to link to its correspondent token cache.
-
-```c#
-public class IntegratedTokenCacheAdapter : MsalDistributedTokenCacheAdapter
-{
-    // removed for brevity...
-    protected override async Task OnBeforeWriteAsync(TokenCacheNotificationArgs args)
-    {
-        var accountActivity = new MsalAccountActivity(args.Account);
-        await UpsertActivity(accountActivity);
-
-        await Task.FromResult(base.OnBeforeWriteAsync(args));
-    }
-    // removed for brevity...
-}
-```
-
-#### IMsalAccountActivityStore Interface
-
-The `IMsalAccountActivityStore.cs` is an interface to decouple the `IntegratedTokenCacheAdapter.cs` from any specific storage source for the `MsalAccountActivity.cs` entity. Rather it be a SQL Server, MySQL, Redis database, etc, you can provide the persistency logic on the `UpsertActivity()` method and even extend the `MsalAccountActivity.cs` entity to add more properties that could be relevant to your user-case.
+[Please refer to this page to learn more about the IntegratedCacheUtils project.](../IntegratedCacheUtilsReadme.md)
 
 ### Web App project
 
@@ -212,19 +183,7 @@ services.AddScoped<IIntegratedTokenCacheStore, IntegratedSqlServerTokenCacheStor
 
 ### BackgroundWorker project
 
-The background worker application, needs to **use the same ApplicationId (ClientId) as the web app**, the same `IMsalAccountActivityStore` implementation as the web app, however it will use `MsalDistributedTokenCacheAdapter` for the token cache provider since we don't need to persist the `MsalAccountActivity.cs` entity in this project.
-
-The main tasks that the background worker application needs to perform in order to use the same token cache as the web app are:
-
-- Retrieve `MsalAccountActivity` entities to acquire an access token for
-- For each entity retrieved, hydrate a class that extends [`IAccount`](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/blob/master/src/client/Microsoft.Identity.Client/IAccount.cs)
-- Call `AcquireTokenSilent()` passing the hydrated [`IAccount`](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/blob/master/src/client/Microsoft.Identity.Client/IAccount.cs) as parameter.
-
-#### Handling MsalUiRequiredException
-
-If MSAL throws a `MsalUiRequiredException` while acquiring a token for an account, it means that an interaction with the user of that account is required. That could be MFA(multi-factor authentication), token expired or revoked and a new login is needed, the cached token got deleted, etc.
-
-Since the background worker doesn't have any user interaction so it could solve this exception, it will have to wait that user to access the web app and handle the required UI interaction. In this sample, we are setting the flag `FailedToAcquireToken` to **true**, but it is up to you to implement a logic that goes with your user-case.
+[Please refer to this page to learn more about the BackgroundWorker project.](../BackgroundWorker.md)
 
 ## Learn more
 

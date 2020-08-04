@@ -11,7 +11,8 @@ namespace IntegratedCacheUtils.Migrations
                 name: "MsalAccountActivities",
                 columns: table => new
                 {
-                    AccountIdentifier = table.Column<string>(nullable: false),
+                    AccountCacheKey = table.Column<string>(nullable: false),
+                    AccountIdentifier = table.Column<string>(nullable: true),
                     AccountObjectId = table.Column<string>(nullable: true),
                     AccountTenantId = table.Column<string>(nullable: true),
                     UserPrincipalName = table.Column<string>(nullable: true),
@@ -20,7 +21,7 @@ namespace IntegratedCacheUtils.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_MsalAccountActivities", x => x.AccountIdentifier);
+                    table.PrimaryKey("PK_MsalAccountActivities", x => x.AccountCacheKey);
                 });
         }
 

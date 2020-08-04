@@ -12,16 +12,18 @@ namespace IntegratedCacheUtils.Entities
     {
         public MsalAccountActivity() { }
 
-        public MsalAccountActivity(IAccount account)
+        public MsalAccountActivity(string cacheKey, IAccount account)
         {
-            AccountObjectId = account.HomeAccountId.ObjectId;
+            AccountCacheKey = cacheKey;
             AccountIdentifier = account.HomeAccountId.Identifier;
+            AccountObjectId = account.HomeAccountId.ObjectId;
             AccountTenantId = account.HomeAccountId.TenantId;
             UserPrincipalName = account.Username;
             LastActivity = DateTime.Now;
         }
 
         [Key]
+        public string AccountCacheKey { get; set; }
         public string AccountIdentifier { get; set; }
         public string AccountObjectId { get; set; }
         public string AccountTenantId { get; set; }
