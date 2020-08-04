@@ -97,6 +97,7 @@ Open the project in your IDE (like Visual Studio) to configure the code.
 
 This sample uses a SQL Server to store the entity `MsalAccountActivity`, and by using [Entity Framework migrations](https://docs.microsoft.com/ef/core/managing-schemas/migrations/?tabs=dotnet-core-cli), you can create the entity table scheme in your database with few steps:
 
+1. On Visual Studio, set **WebApp** as the startup project.
 1. On Visual Studio, open the **Package Manager Console** tab.
 2. On the **Default Project** dropdown, select `IntegratedCacheUtils`.
 3. On the console, execute the command `Update-Database`. 
@@ -113,7 +114,7 @@ If you want to store the token cache on your database as well, you must create t
 dotnet sql-cache create "Data Source=<Your-DB-connection-string>" dbo <table-name-to-be-created>
 ```
 
-Example:
+Example (note that the command can't have the escape `\` character in the connection string ):
 
 ```shell
 dotnet sql-cache create "Data Source=(localdb)\MSSQLLocalDB;Initial Catalog=MsalTokenCacheDatabase;Integrated Security=True;" dbo TokenCache
@@ -125,7 +126,7 @@ To populate the distributed token cache, and the entity `MsalAccountActivity`, t
 
 Once you have signed-in with at least 2 users, stop the WebApp project, **without signing them out** and execute the BackgroundWorker project.
 
-The background worker is returning all account activities that happened more than 5 minutes ago. You could either change the time interval or wait for it. 
+The background worker is returning all account activities that happened more than 30 seconds ago. You could either change the time interval or wait for it. 
 
 With all the accounts retrieved, the background worker will print those that got their token acquired successfully and those that failed. To test a failure scenario, you can sign-out one of the users in the WebApp, and execute the background worker again. 
 

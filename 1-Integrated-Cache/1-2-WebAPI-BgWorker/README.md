@@ -165,14 +165,10 @@ Open the project in your IDE to configure the code.
 > In the steps below, "ClientID" is the same as "Application ID" or "AppId".
 
 1. Open the `SPA\src\utils\authConfig.js` file
-1. Find the app key `Enter the Client Id (aka 'Application ID')` and replace the existing value with the application ID (clientId) of the `ProfileSPA-AdvancedToken` application copied from the Azure portal.
-
-1. Find the app key `Enter the Authority, e.g 'https://login.microsoftonline.com/{tid}'` and replace the existing value with ('https://login.microsoftonline.com/'+ $tenantId).
-
-1. Find the app key `Enter the API scopes as declared in the app registration 'Expose an Api' blade in the form of 'api://{client_id}/.default'` and replace the existing value with ScopeDefault.
-
-1. Find the app key `Enter the WebAPI URI, e.g. 'https://localhost:44351/api/profile'` and replace the existing value with the base address of the IntegratedWebApi-AdvancedToken project (by default `https://localhost:44351/api/profile`).
-
+1. Find the app key `clientId` and replace the existing value with the application ID (clientId) of the `ProfileSPA-AdvancedToken` application copied from the Azure portal.
+1. Find the app key `authority` and replace the existing value with ('https://login.microsoftonline.com/'+ $tenantId).
+1. Find the app key `apiURI` and replace the existing value with the base address of the IntegratedWebApi-AdvancedToken project (by default `https://localhost:44351/api/profile`).
+1. Find the app key `resourceScope` and replace the existing value with ScopeDefault.
 
 #### Configure Known Client Applications for service (IntegratedWebApi-AdvancedToken)
 
