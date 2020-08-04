@@ -7,19 +7,30 @@ products:
 - azure-ad
 - ms-graph
 - redis
-description: "ASP.Net Core samples to integrate a distributed token cache with other applications under the same App Registration"
+level: 400
+author: tiagobrenck
+services: active-directory
+platforms: dotnet
+endpoint: Microsoft identity platform
+description: "An ASP.Net Core sample that shows how background apps and services can access the MSAL token cache and continue to act on-behalf of users in their absence."
 urlFragment: "ms-identity-dotnet-advanced-token-cache"
 ---
 
-# ASP.Net Core samples to integrate a distributed token cache with other applications under the same App Registration
+# Accessing the user's token cache from background apps and services
 
-This tutorial demonstrates advanced token cache scenarios, such as integrating a distributed token cache with other applications that are under the same App Registration on [Azure Portal](https://portal.azure.com/), sharing the same ClientId.
+This ASP.Net Core sample that shows how background apps and services can access  [MSAL's Access token cache](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/wiki/token-cache-serialization) and continue to act on-behalf of users in their absence.
+
+The [MSAL.NET](http://aka.ms/msal-net) and the [Microsoft.Identity.Web](https://aka.ms/microsoft-identity-web) libraries provide various mechanisms for apps that authenticate users with the [Microsoft Identity Platform](http://aka.ms/identityplatform) to cache [Access Tokens](https://aka.ms/access-tokens) for various resources like [Microsoft Graph](https://graph.microsoft.com) to a [distributed token cache implementations like Sql Server or Redis](https://github.com/AzureAD/microsoft-identity-web/wiki/token-cache-serialization).
+
+This tutorial explains how by sharing the same App Registration in [Azure Portal](https://portal.azure.com/) (sharing the same ClientId), background processes and services can still continue to work on behalf of the user after the user has exited the frontend web app.
+
+Today, most background processes that need to work with user's data without them being present to authenticate or re-authenticate make use of [Application Permissions](https://docs.microsoft.com/graph/auth/auth-concepts#microsoft-graph-permissions) which often require an [admin consent](https://docs.microsoft.com/azure/active-directory/develop/v2-admin-consent). This requires an elevation of privilege and is often an unnecessary hassle as the developer did not intend to obtain over what a user consents to their app.
 
 ## Contents
 
 | File/folder                 | Description                                |
 |-----------------------------|--------------------------------------------|
-| `1-Integrated-Cache`        | Integrating the token cache between applications. |
+| `1-Integrated-Cache`        | The various applications used in this sample. |
 | `CONTRIBUTING.md`           | Guidelines for contributing to the sample. |
 | `LICENSE`                   | The license for the sample.                |
 
@@ -37,7 +48,7 @@ git clone https://github.com/Azure-Samples/ms-identity-dotnet-advanced-token-cac
 
 ### Step 2
 
-Navigate to [1-Integrated-Cache](./1-Integrated-Cache/1-1-WebApp-BgWorker/README.md) where we'll learn about integrating a distributed token cache from a Web App.
+Navigate to the [Sharing the MSAL token cache between a web app and a background console worker app](./1-Integrated-Cache/1-1-WebApp-BgWorker/README.md) where we'll learn about how to share the token cache between a Web App that signs-in users and a background console worker process.
 
 ## More information
 
@@ -47,7 +58,6 @@ For more information, visit the following links:
 - Learn about [Microsoft.Identity.Web](https://github.com/AzureAD/microsoft-identity-web/wiki)
 - Learn how to enable distributed caches in [token cache serialization](https://github.com/AzureAD/microsoft-identity-web/wiki/token-cache-serialization)
 - [Use HttpClientFactory to implement resilient HTTP requests](https://docs.microsoft.com/en-us/dotnet/standard/microservices-architecture/implement-resilient-applications/use-httpclientfactory-to-implement-resilient-http-requests) used by the Graph custom service
-
 
 ## Community Help and Support
 
