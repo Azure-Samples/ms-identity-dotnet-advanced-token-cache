@@ -8,7 +8,9 @@ using System.Text;
 
 namespace IntegratedCacheUtils.Entities
 {
-    // TODO: Comment, very well
+    // This entity represents the user IAccount that MSAL used to acquire an access token, with additional properties to help the background worker
+    // to link a cached token with its correspondent user.
+    // Feel free to include more properties that are relevant to your use case
     public class MsalAccountActivity
     {
         public MsalAccountActivity() { }

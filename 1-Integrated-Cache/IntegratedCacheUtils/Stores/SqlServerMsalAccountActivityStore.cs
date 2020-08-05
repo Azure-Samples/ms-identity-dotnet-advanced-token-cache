@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace IntegratedCacheUtils.Stores
 {
-    // TODO: Comment
+    // Store used by this sample to illustrate a scenario where you are storying the MsalAccountActivity on a Sql Server database
     public class SqlServerMsalAccountActivityStore : IMsalAccountActivityStore
     {
         private IntegratedTokenCacheDbContext _dbContext;
@@ -18,7 +18,7 @@ namespace IntegratedCacheUtils.Stores
             _dbContext = dbContext;
         }
 
-        // TODO: Comment
+        // Retrieve MsalAccountActivites that happened before a certain time ago
         public async Task<IEnumerable<MsalAccountActivity>> GetMsalAccountActivitesSince(DateTime lastActivityDate)
         {
             return await _dbContext.MsalAccountActivities
@@ -27,7 +27,7 @@ namespace IntegratedCacheUtils.Stores
                 .ToListAsync();
         }
 
-        // TODO: Comment
+        // Retireve a specific user MsalAccountActivity
         public async Task<MsalAccountActivity> GetMsalAccountActivityForUser(string userPrincipalName)
         {
             return await _dbContext.MsalAccountActivities
@@ -36,7 +36,7 @@ namespace IntegratedCacheUtils.Stores
                             .FirstOrDefaultAsync();
         }
 
-        // TODO: Comment
+        // Setting the flag FailedToAcquireToken to true
         public async Task HandleIntegratedTokenAcquisitionFailure(MsalAccountActivity failedAccountActivity)
         {
             failedAccountActivity.FailedToAcquireToken = true;
@@ -44,7 +44,7 @@ namespace IntegratedCacheUtils.Stores
             await _dbContext.SaveChangesAsync();
         }
 
-        // TODO: Comment
+        // Insert a new MsalAccountActivity case it doesnt exist, otherwise update the existing entry
         public async Task UpsertMsalAccountActivity(MsalAccountActivity msalAccountActivity)
         {
             if (_dbContext.MsalAccountActivities.Count(x => x.AccountCacheKey == msalAccountActivity.AccountCacheKey) != 0)

@@ -41,7 +41,8 @@ namespace WebApp
             services.AddDbContext<IntegratedTokenCacheDbContext>(options =>
                 options.UseSqlServer(Configuration.GetConnectionString("TokenCacheDbConnStr")));
 
-            // TODO: comment
+            // Configure the dependency injection for IMsalAccountActivityStore to use a SQL Server to store the entity MsalAccountActivity.
+            // You might want to customize this class, or implement our own, with logic that fits your business need.
             services.AddScoped<IMsalAccountActivityStore, SqlServerMsalAccountActivityStore>();
 
             services.Configure<CookiePolicyOptions>(options =>
@@ -53,13 +54,15 @@ namespace WebApp
                 options.HandleSameSiteCookieCompatibility();
             });
 
-            // TODO: comment
+            // Sign-in users with the Microsoft identity platform
+            // Configures the web app to call a web api (Ms Graph)
+            // Sets the IMsalTokenCacheProvider to be the IntegratedTokenCacheAdapter
             services.AddAuthentication(OpenIdConnectDefaults.AuthenticationScheme)
                 .AddMicrosoftWebApp(Configuration)
                 .AddMicrosoftWebAppCallsWebApi(Configuration, new string[] { Constants.ScopeUserRead })
                 .AddIntegratedUserTokenCache();
 
-            // Configure Sql Server as Token cache store
+            // Add Sql Server as distributed Token cache store
             services.AddDistributedSqlServerCache(options =>
             {
                 /*
@@ -73,7 +76,7 @@ namespace WebApp
                 options.DefaultSlidingExpiration = TimeSpan.FromHours(2);
             });
 
-            // Add Redis as Token cache store
+            // Add Redis as distributed Token cache store
             //services.AddStackExchangeRedisCache(options =>
             //{
             //    options.Configuration = Configuration.GetConnectionString("TokenCacheRedisConnStr");

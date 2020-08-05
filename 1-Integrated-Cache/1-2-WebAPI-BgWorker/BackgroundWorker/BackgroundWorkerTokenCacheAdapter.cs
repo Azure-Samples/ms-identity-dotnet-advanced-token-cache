@@ -8,6 +8,9 @@ using System.Threading.Tasks;
 
 namespace BackgroundWorker
 {
+    /// <summary>
+    /// Custom token cache adapter where you can explicitly tell what is the cache key to be used
+    /// </summary>
     public class BackgroundWorkerTokenCacheAdapter : MsalDistributedTokenCacheAdapter
     {
         /// <summary>

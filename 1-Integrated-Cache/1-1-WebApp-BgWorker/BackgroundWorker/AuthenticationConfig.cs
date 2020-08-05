@@ -5,7 +5,7 @@ using System.IO;
 
 namespace BackgroundWorker
 {
-    // TODO: Comment
+    // Class to read the keys from appsettings.json
     public class AuthenticationConfig
     {
         /// <summary>

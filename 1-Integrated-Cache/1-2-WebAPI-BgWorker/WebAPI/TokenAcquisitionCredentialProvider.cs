@@ -6,6 +6,9 @@ using System.Threading.Tasks;
 
 namespace WebAPI
 {
+    /// <summary>
+    /// Class used to add the bearer token header with the access token obtained for the signed user
+    /// </summary>
     internal class TokenAcquisitionCredentialProvider : IAuthenticationProvider
     {
         public TokenAcquisitionCredentialProvider(ITokenAcquisition tokenAcquisition, IEnumerable<string> initialScopes)

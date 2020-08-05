@@ -30,6 +30,10 @@ namespace WebAPI.Controllers
             _graphServiceClient = graphServiceClient;
         }
 
+        /// <summary>
+        /// Get the user's profile from MS Graph
+        /// </summary>
+        /// <returns></returns>
         [HttpGet]
         public async Task<string> Get()
         {

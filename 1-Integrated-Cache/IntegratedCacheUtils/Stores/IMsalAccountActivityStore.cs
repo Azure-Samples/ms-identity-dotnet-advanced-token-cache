@@ -6,7 +6,8 @@ using System.Threading.Tasks;
 
 namespace IntegratedCacheUtils.Stores
 {
-    // TODO: Comment
+    // Interface for basics operations of MsalAccountActivity.
+    // Implement this interface with your own logic on where to persist the entity, how to handle failures and etc
     public interface IMsalAccountActivityStore
     {
         Task UpsertMsalAccountActivity(MsalAccountActivity msalAccountActivity);

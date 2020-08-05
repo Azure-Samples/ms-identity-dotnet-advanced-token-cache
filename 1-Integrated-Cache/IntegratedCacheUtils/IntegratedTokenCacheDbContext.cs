@@ -7,7 +7,7 @@ using System.Text;
 
 namespace IntegratedCacheUtils
 {
-    // TODO: Comment
+    // DbContext used to access the entity MsalAccountActivity
     public class IntegratedTokenCacheDbContext : DbContext
     {
         public IntegratedTokenCacheDbContext(DbContextOptions<IntegratedTokenCacheDbContext> options) : base(options) { }

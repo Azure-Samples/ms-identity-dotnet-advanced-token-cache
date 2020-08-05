@@ -6,7 +6,6 @@ using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
-// TODO: Is this class needed in this project ?
 namespace IntegratedCacheUtils.Migrations
 {
     [DbContext(typeof(IntegratedTokenCacheDbContext))]

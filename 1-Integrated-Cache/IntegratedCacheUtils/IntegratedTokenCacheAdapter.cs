@@ -12,7 +12,8 @@ using System.Threading.Tasks;
 
 namespace IntegratedCacheUtils
 {
-    // TODO: Comment
+    // An extension of MsalDistributedTokenCacheAdapter, that will upsert the entity MsalAccountActivity
+    // before MSAL writes an entry in the token cache
     public class IntegratedTokenCacheAdapter : MsalDistributedTokenCacheAdapter
     {
         private readonly IServiceScopeFactory _scopeFactory;
@@ -25,7 +26,8 @@ namespace IntegratedCacheUtils
             _scopeFactory = scopeFactory;
         }
 
-        // TODO: Comment
+        // Overriding OnBeforeWriteAsync to upsert the entity MsalAccountActivity
+        // before MSAL writes an entry in the token cache
         protected override async Task OnBeforeWriteAsync(TokenCacheNotificationArgs args)
         {
             var accountActivity = new MsalAccountActivity(args.SuggestedCacheKey, args.Account);
@@ -34,7 +36,7 @@ namespace IntegratedCacheUtils
             await Task.FromResult(base.OnBeforeWriteAsync(args));
         }
 
-        // TODO: Comment
+        // Call the upsert method of the class that implements IMsalAccountActivityStore 
         private async Task<MsalAccountActivity> UpsertActivity(MsalAccountActivity accountActivity)
         {
             using (var scope = _scopeFactory.CreateScope())
@@ -45,42 +47,6 @@ namespace IntegratedCacheUtils
 
                 return accountActivity;
             }
-        }
-    }
-
-    // TODO: Move to its own file
-    public static class IntegratedTokenCacheExtensions
-    {
-        /// <summary>Adds an integrated per-user .NET Core distributed based token cache.</summary>
-        /// <param name="services">The services collection to add to.</param>
-        /// <returns>A <see cref="IServiceCollection"/> to chain.</returns>
-        public static IServiceCollection AddIntegratedUserTokenCache(
-            this IServiceCollection services)
-        {
-            if (services == null)
-            {
-                throw new ArgumentNullException(nameof(services));
-            }
-
-            services.AddDistributedMemoryCache();
-            services.AddHttpContextAccessor();
-            services.AddSingleton<IMsalTokenCacheProvider, IntegratedTokenCacheAdapter>();
-            return services;
-        }
-
-        /// <summary>Adds an integrated per-user .NET Core distributed based token cache.</summary>
-        /// <param name="builder">The Authentication builder to add to.</param>
-        /// <returns>A <see cref="AuthenticationBuilder"/> to chain.</returns>
-        public static AuthenticationBuilder AddIntegratedUserTokenCache(
-            this AuthenticationBuilder builder)
-        {
-            if (builder == null)
-            {
-                throw new ArgumentNullException(nameof(builder));
-            }
-
-            builder.Services.AddIntegratedUserTokenCache();
-            return builder;
         }
     }
 }

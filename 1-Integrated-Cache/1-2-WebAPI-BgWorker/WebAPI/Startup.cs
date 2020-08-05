@@ -30,10 +30,17 @@ namespace WebAPI
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            // Add Sql Server as Token cache store
             services.AddDbContext<IntegratedTokenCacheDbContext>(options => 
                 options.UseSqlServer(Configuration.GetConnectionString("TokenCacheDbConnStr")));
+
+            // Configure the dependency injection for IMsalAccountActivityStore to use a SQL Server to store the entity MsalAccountActivity.
+            // You might want to customize this class, or implement our own, with logic that fits your business need.
             services.AddScoped<IMsalAccountActivityStore, SqlServerMsalAccountActivityStore>();
 
+            // Adds Microsoft Identity platform (AAD v2.0) support to protect this Api
+            // Configures the web api to call another web api (Ms Graph) using OBO
+            // Sets the IMsalTokenCacheProvider to be the IntegratedTokenCacheAdapter
             services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
                 .AddMicrosoftWebApi(Configuration)
                 .AddMicrosoftWebApiCallsWebApi(Configuration)
@@ -41,7 +48,7 @@ namespace WebAPI
 
             services.AddMicrosoftGraph(Configuration, new string[] { "user.read" });
 
-            // SQL SERVER DISTRIBUTED TOKEN CACHE
+            // Add Sql Server as distributed Token cache store
             services.AddDistributedSqlServerCache(options =>
             {
                 /*
@@ -55,7 +62,7 @@ namespace WebAPI
                 options.DefaultSlidingExpiration = TimeSpan.FromHours(2); 
             });
 
-            // REDIS DISTRIBUTED TOKEN CACHE
+            // Add Redis as distributed Token cache store
             //services.AddStackExchangeRedisCache(options =>
             //{
             //    options.Configuration = Configuration.GetConnectionString("TokenCacheRedisConnStr");

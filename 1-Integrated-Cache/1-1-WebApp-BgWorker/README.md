@@ -1,14 +1,7 @@
 ---
 page_type: sample
-author: tiagobrenck
 languages:
   - csharp
-services: active-directory
-platforms: dotnet
-level: 400
-client: ASP.NET Core Web App
-service: Microsoft Graph
-endpoint: Microsoft identity platform
 products:
   - microsoft-authentication-library
   - microsoft-identity-platform
@@ -46,8 +39,6 @@ Pre-requisites:
 ```shell
 dotnet tool install --global dotnet-sql-cache
 ```
-
-- If you don't have a SQL Server database to be used in this sample yet, [please create one](https://docs.microsoft.com//sql/relational-databases/databases/create-a-database). You can name it as you wish.
 
 ### Step 1: Navigate to the solution folder in the cloned repository
 
@@ -171,34 +162,6 @@ Open the project in your IDE (like Visual Studio) to configure the code.
    - If you will use **SQL Server**, update the key `TokenCacheDbConnStr` with the database connection string.
    - If you will use **Redis**, update the key `TokenCacheRedisConnStr` with the Redis connection string, and the key `TokenCacheRedisInstaceName` with the the Redis instance name.
 
-### Step 4: Configure the SQL Server database
-
->Note: You just need to apply the Entity Framework migrations once, when you are running the sample for the very first time.
-
-This sample uses a SQL Server to store the entity `MsalAccountActivity`, and by using [Entity Framework migrations](https://docs.microsoft.com/ef/core/managing-schemas/migrations/?tabs=dotnet-core-cli), you can create the entity table scheme in your database with few steps:
-
-1. On Visual Studio, select **WebApp** as the startup project.
-1. On Visual Studio, open the **Package Manager Console** tab.
-1. On the **Default Project** dropdown, select `IntegratedCacheUtils`.
-1. On the console, execute the command `Update-Database`.
-
-If your solution is building without errors and you have setup the database connection string, this script will create the table `MsalAccountActivities`. If you are not using Visual Studio, please [check how to apply Entity Framework migrations via CLI](https://docs.microsoft.com/ef/core/managing-schemas/migrations/applying?tabs=dotnet-core-cli).
-
-### Storing the token cache on the SQL Server database
-
->NOTE: If you are storing the token cache on Redis, you can skip this step.
-
-If you want to store the token cache on your database as well, you must create the the token cache table before. To do so, open the **Developer Command Prompt for Visual Studio** (running as administrator) and run the following script, replacing the connection string value with your own:
-
-```shell
-dotnet sql-cache create "Data Source=<Your-DB-connection-string>" dbo <table-name-to-be-created>
-```
-
-Example (note that the command can't have the escape character `\` in the connection string):
-
-```shell
-dotnet sql-cache create "Data Source=(localdb)\MSSQLLocalDB;Initial Catalog=MsalTokenCacheDatabase;Integrated Security=True;" dbo TokenCache
-```
 
 ### Storing the token cache on Redis
 
@@ -213,7 +176,7 @@ If you are storing the distributed token cache on Redis, you will need to modify
   - Comment the section named **SQL SERVER CONFIG**
   - Uncomment the section named **REDIS CONFIG**
 
-## Step 5: Run the sample
+## Step 4: Run the sample
 
 To populate the distributed token cache, and the entity `MsalAccountActivity`, the **WebApp must be executed first**. Open the WebApp on multiple browsers (or using the same browser but in incognito mode) and sign-in with multiple users. **Do not sign-out, otherwise their token cache will be deleted**.
 

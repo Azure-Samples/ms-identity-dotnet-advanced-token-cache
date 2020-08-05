@@ -14,19 +14,19 @@ using System.Threading.Tasks;
 
 namespace BackgroundWorker
 {
-    class Program
+    internal class Program
     {
         private static ServiceProvider _serviceProvider = null;
         private static IMsalAccountActivityStore _msalAccountActivityStore = null;
         private static AuthenticationConfig config = AuthenticationConfig.ReadFromJsonFile("appsettings.json");
 
-        static void Main(string[] args)
+        private static void Main(string[] args)
         {
             try
             {
                 Console.WriteLine("Application started! \n");
 
-                // SQL SERVER CONFIG
+                // SQL SERVER CONFIG, this should match that of the WebApi
                 _serviceProvider = new ServiceCollection()
                     .AddLogging()
                     .AddDistributedMemoryCache()
@@ -41,7 +41,7 @@ namespace BackgroundWorker
                     .AddScoped<IMsalAccountActivityStore, SqlServerMsalAccountActivityStore>()
                     .BuildServiceProvider();
 
-                // REDIS CONFIG
+                // REDIS CONFIG, this should match that of the WebApi
                 //_serviceProvider = new ServiceCollection()
                 //    .AddLogging()
                 //    .AddDistributedMemoryCache()
@@ -75,7 +75,7 @@ namespace BackgroundWorker
         {
             var scopes = new string[] { "User.Read" };
 
-            // Return the MsalAccountActivities that you would like to acquire a token silently
+            // Return the MsalAccountActivities of the users that you would like to acquire a token silently
             var someTimeAgo = DateTime.Now.AddMinutes(-1);
             var accountsToAcquireToken = await _msalAccountActivityStore.GetMsalAccountActivitesSince(someTimeAgo);
 
@@ -96,7 +96,7 @@ namespace BackgroundWorker
 
                 IConfidentialClientApplication app = GetConfidentialClientApplication(config);
 
-                // For each record, hydrate an IAccount with the values saved on the table, and call AcquireTokenSilent for this account.
+                // For each user's record, hydrate an IAccount with the values saved on the table, and call AcquireTokenSilent for this account.
                 foreach (var account in accountsToAcquireToken)
                 {
                     var msalCache = new BackgroundWorkerTokenCacheAdapter(account.AccountCacheKey,
@@ -126,8 +126,8 @@ namespace BackgroundWorker
                     }
                     catch (MsalUiRequiredException ex)
                     {
-                        /* 
-                         * If MsalUiRequiredException is thrown for an account, it means that a user interaction is required 
+                        /*
+                         * If MsalUiRequiredException is thrown for an account, it means that a user interaction is required
                          * thus the background worker wont be able to acquire a token silently for it.
                          * The user of that account will have to access the web app to perform this interaction.
                          * Examples that could cause this: MFA requirement, token expired or revoked, token cache deleted, etc
@@ -160,10 +160,6 @@ namespace BackgroundWorker
                 .WithClientSecret(config.ClientSecret)
                 .WithAuthority(new Uri(config.Authority))
                 .Build();
-
-            //var msalCache = _serviceProvider.GetService<IMsalTokenCacheProvider>();
-
-            //await msalCache.InitializeAsync(app.UserTokenCache);
 
             return app;
         }
