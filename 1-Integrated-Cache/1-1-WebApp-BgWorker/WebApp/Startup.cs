@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
 using IntegratedCacheUtils;
@@ -12,9 +13,11 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.HttpsPolicy;
 using Microsoft.AspNetCore.Mvc.Authorization;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Caching.SqlServer;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Options;
 using Microsoft.Graph;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Web;
@@ -88,6 +91,14 @@ namespace WebApp
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
+            using (var serviceScope = app.ApplicationServices.GetService<IServiceScopeFactory>().CreateScope())
+            {
+                var context = serviceScope.ServiceProvider.GetRequiredService<IntegratedTokenCacheDbContext>();
+                context.Database.Migrate();
+                // Comment the line below if you are using Redis distributed token cache
+                SqlCacheExtensions.ConfigureSqlCacheFromCommand(Configuration);
+            }
+
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
@@ -114,6 +125,31 @@ namespace WebApp
                     pattern: "{controller=Home}/{action=Index}/{id?}");
                 endpoints.MapRazorPages();
             });
+        }
+    }
+
+    public static class SqlCacheExtensions
+    {
+        public static void ConfigureSqlCacheFromCommand(IConfiguration configuration)
+        {
+            var process = new System.Diagnostics.Process()
+            {
+                StartInfo = new ProcessStartInfo
+                {
+                    FileName = "cmd.exe",
+                    Arguments = $"/c dotnet sql-cache create \"{configuration.GetConnectionString("TokenCacheDbConnStr")}\" dbo TokenCache",
+                    RedirectStandardOutput = true,
+                    UseShellExecute = false,
+                    CreateNoWindow = false,
+                    WindowStyle = ProcessWindowStyle.Normal,
+                    RedirectStandardInput = true,
+                    RedirectStandardError = true
+                }
+            };
+            process.Start();
+            string input = process.StandardError.ReadToEnd();
+            string result = process.StandardOutput.ReadToEnd();
+            process.WaitForExit();
         }
     }
 }

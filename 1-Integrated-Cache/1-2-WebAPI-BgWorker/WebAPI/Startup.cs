@@ -13,6 +13,7 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Identity.Web;
 using Microsoft.Identity.Web.TokenCacheProviders;
 using System;
+using System.Diagnostics;
 using WebAPI.Services;
 
 namespace WebAPI
@@ -75,6 +76,14 @@ namespace WebAPI
 
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
+            using (var serviceScope = app.ApplicationServices.GetService<IServiceScopeFactory>().CreateScope())
+            {
+                var context = serviceScope.ServiceProvider.GetRequiredService<IntegratedTokenCacheDbContext>();
+                context.Database.Migrate();
+                // Comment the line below if you are using Redis distributed token cache
+                SqlCacheExtensions.ConfigureSqlCacheFromCommand(Configuration);
+            }
+
             if (env.IsDevelopment())
             {
                 // Since IdentityModel version 5.2.1 (or since Microsoft.AspNetCore.Authentication.JwtBearer version 2.2.0),
@@ -103,4 +112,28 @@ namespace WebAPI
             });
         }
     }
-}
+
+    public static class SqlCacheExtensions
+    {
+        public static void ConfigureSqlCacheFromCommand(IConfiguration configuration)
+        {
+            var process = new System.Diagnostics.Process()
+            {
+                StartInfo = new ProcessStartInfo
+                {
+                    FileName = "cmd.exe",
+                    Arguments = $"/c dotnet sql-cache create \"{configuration.GetConnectionString("TokenCacheDbConnStr")}\" dbo TokenCache",
+                    RedirectStandardOutput = true,
+                    UseShellExecute = false,
+                    CreateNoWindow = false,
+                    WindowStyle = ProcessWindowStyle.Normal,
+                    RedirectStandardInput = true,
+                    RedirectStandardError = true
+                }
+            };
+            process.Start();
+            string input = process.StandardError.ReadToEnd();
+            string result = process.StandardOutput.ReadToEnd();
+            process.WaitForExit();
+        }
+    }
