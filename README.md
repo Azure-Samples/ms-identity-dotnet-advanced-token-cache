@@ -4,14 +4,12 @@ languages:
 - csharp
 products:
 - dotnet
-- azure-ad
+- dotnet-core
+- aspnet-core
+- azure
+- azure-active-directory
+- azure-cache-redis
 - ms-graph
-- redis
-level: 400
-author: tiagobrenck
-services: active-directory
-platforms: dotnet
-endpoint: Microsoft identity platform
 description: "An ASP.Net Core sample that shows how background apps and services can access the MSAL token cache and continue to act on-behalf of users in their absence."
 urlFragment: "ms-identity-dotnet-advanced-token-cache"
 ---

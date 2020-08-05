@@ -1,11 +1,16 @@
 ---
-services: active-directory
-platforms: dotnet
-author: tiagobrenck
-level: 400
-client: ASP.NET Core Web App
-service: Microsoft Graph
-endpoint: Microsoft identity platform
+page_type: sample
+languages:
+- csharp
+products:
+- dotnet
+- dotnet-core
+- aspnet-core
+- azure
+- azure-active-directory
+- azure-cache-redis
+- ms-graph
+description: "An ASP.Net Core sample that shows how background apps and services can access the MSAL token cache and continue to act on-behalf of users in their absence."
 ---
 
 # Using an integrated token cache between a web api and a background worker
@@ -168,7 +173,7 @@ Open the project in your IDE to configure the code.
 1. Find the app key `clientId` and replace the existing value with the application ID (clientId) of the `ProfileSPA-AdvancedToken` application copied from the Azure portal.
 1. Find the app key `authority` and replace the existing value with ('https://login.microsoftonline.com/'+ $tenantId).
 1. Find the app key `apiURI` and replace the existing value with the base address of the IntegratedWebApi-AdvancedToken project (by default `https://localhost:44351/api/profile`).
-1. Find the app key `resourceScope` and replace the existing value with ScopeDefault.
+2. Find the app key `resourceScope` and replace the existing value with the `/.default` scope: `api://{client_id}/.default`. [Learn more about the /.default scope](https://docs.microsoft.com/azure/active-directory/develop/v2-permissions-and-consent#the-default-scope)
 
 #### Configure Known Client Applications for service (IntegratedWebApi-AdvancedToken)
 
@@ -243,6 +248,19 @@ Example:
 dotnet sql-cache create "Data Source=(localdb)\MSSQLLocalDB;Initial Catalog=MsalTokenCacheDatabase;Integrated Security=True;" dbo TokenCache
 ```
 
+### Storing the token cache on Redis
+
+>NOTE: If you are storing the token cache on SQL Server, you can skip this step.
+
+If you are storing the distributed token cache on Redis, you will need to modify the *BackgroundWorker* `Program.cs` file, and *WebAPI* `Startup.cs` file:
+
+- Open the file `Program.cs`
+  - Comment the section named **SQL SERVER CONFIG**
+  - Uncomment the section named **REDIS CONFIG**
+- Open the file `Startup.cs`
+  - Comment the section named **SQL SERVER CONFIG**
+  - Uncomment the section named **REDIS CONFIG**
+
 ## Step 5: Run the sample
 
 To populate the distributed token cache, and the entity `MsalAccountActivity`, the **SPA and WebApi must be executed first**. 
@@ -274,13 +292,13 @@ Once `npm install` is completed, you can run the SPA with the command:
 npm start
 ```
 
-Open the SPA on multiple browser tabs (you might want to open the tabs in incognito) and sign-in with multiple users.
+Open the SPA on multiple browsers (or using the same browser but in incognito mode), sign-in with multiple users and click on the **Call Web API** button.
 
 Once you have signed-in with at least 2 users you can stop both SPA and WebAPI projects, and execute the BackgroundWorker project.
 
-The background worker is returning all account activities that happened more than 1 minutes ago. You could either change the time interval or wait for it. 
+The background worker is returning all account activities that happened more than 30 seconds ago. You can either change the time interval or wait for it. 
 
-With all the accounts retrieved, the background worker will print those that got their token acquired successfully and those that failed. To test a failure scenario, you can for instance, delete one of the users token cache and execute the background worker again. 
+With all the accounts retrieved, the background worker will print those that got their token acquired successfully and those that failed. To test a failure scenario, you can for instance, delete one of the users token cache and execute the background worker again, or wait for its sliding expiration time and try again (the sliding expiration is set on **Startup.cs**). 
 
 ## About The code
 

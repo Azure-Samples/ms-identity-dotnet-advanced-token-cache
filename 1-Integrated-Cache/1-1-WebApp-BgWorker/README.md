@@ -194,19 +194,32 @@ If you want to store the token cache on your database as well, you must create t
 dotnet sql-cache create "Data Source=<Your-DB-connection-string>" dbo <table-name-to-be-created>
 ```
 
-Example (note that the command can't have the escape `\` character in the connection string ):
+Example (note that the command can't have the escape character `\` in the connection string):
 
 ```shell
 dotnet sql-cache create "Data Source=(localdb)\MSSQLLocalDB;Initial Catalog=MsalTokenCacheDatabase;Integrated Security=True;" dbo TokenCache
 ```
 
-### Step 5: Run the sample
+### Storing the token cache on Redis
 
-To populate the distributed token cache, and the entity `MsalAccountActivity`, the **WebApp must be executed first**. Open the WebApp on multiple browser tabs (you might want to open the tabs in incognito) and sign-in with multiple users. **Do not sign-out, otherwise their token cache will be deleted**.
+>NOTE: If you are storing the token cache on SQL Server, you can skip this step.
+
+If you are storing the distributed token cache on Redis, you will need to modify the *BackgroundWorker* `Program.cs` file, and *WebAPI* `Startup.cs` file:
+
+- Open the file `Program.cs`
+  - Comment the section named **SQL SERVER CONFIG**
+  - Uncomment the section named **REDIS CONFIG**
+- Open the file `Startup.cs`
+  - Comment the section named **SQL SERVER CONFIG**
+  - Uncomment the section named **REDIS CONFIG**
+
+## Step 5: Run the sample
+
+To populate the distributed token cache, and the entity `MsalAccountActivity`, the **WebApp must be executed first**. Open the WebApp on multiple browsers (or using the same browser but in incognito mode) and sign-in with multiple users. **Do not sign-out, otherwise their token cache will be deleted**.
 
 Once you have signed-in with at least 2 users, stop the WebApp project, **without signing them out** and execute the **BackgroundWorker** project.
 
-The background worker is returning all account activities that happened more than 30 seconds ago. You could either change the time interval or wait for it.
+The background worker is returning all account activities that happened more than 30 seconds ago. You can either change the time interval or wait for it. 
 
 With all the accounts retrieved, the background worker will print those that got their token acquired successfully and those that failed. To test a failure scenario, you can sign-out one of the users in the WebApp, and execute the background worker again.
 
