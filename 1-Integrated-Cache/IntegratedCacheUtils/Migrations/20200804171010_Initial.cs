@@ -1,6 +1,7 @@
 ﻿using System;
 using Microsoft.EntityFrameworkCore.Migrations;
 
+// TODO: Is this class needed in this project ?
 namespace IntegratedCacheUtils.Migrations
 {
     public partial class Initial : Migration

@@ -34,9 +34,11 @@ namespace WebApp
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            // SQL SERVER STORE
+            // Add Sql Server as Token cache store
             services.AddDbContext<IntegratedTokenCacheDbContext>(options =>
                 options.UseSqlServer(Configuration.GetConnectionString("TokenCacheDbConnStr")));
+
+            // TODO: comment
             services.AddScoped<IMsalAccountActivityStore, SqlServerMsalAccountActivityStore>();
 
             services.Configure<CookiePolicyOptions>(options =>
@@ -48,12 +50,13 @@ namespace WebApp
                 options.HandleSameSiteCookieCompatibility();
             });
 
+            // TODO: comment
             services.AddAuthentication(OpenIdConnectDefaults.AuthenticationScheme)
                 .AddMicrosoftWebApp(Configuration)
                 .AddMicrosoftWebAppCallsWebApi(Configuration, new string[] { Constants.ScopeUserRead })
                 .AddIntegratedUserTokenCache();
 
-            // SQL SERVER DISTRIBUTED TOKEN CACHE
+            // Configure Sql Server as Token cache store
             services.AddDistributedSqlServerCache(options =>
             {
                 /*
@@ -65,7 +68,7 @@ namespace WebApp
                 options.TableName = "TokenCache";
             });
 
-            // REDIS DISTRIBUTED TOKEN CACHE
+            // Add Redis as Token cache store
             //services.AddStackExchangeRedisCache(options =>
             //{
             //    options.Configuration = Configuration.GetConnectionString("TokenCacheRedisConnStr");

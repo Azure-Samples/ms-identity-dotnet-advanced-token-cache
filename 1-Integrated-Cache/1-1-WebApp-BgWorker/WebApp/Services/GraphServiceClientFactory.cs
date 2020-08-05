@@ -1,25 +1,23 @@
 ﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.Graph;
 using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Threading.Tasks;
 
 namespace WebApp.Services
 {
+    // TODO: Comment
     public class GraphServiceClientFactory
     {
         public static GraphServiceClient GetAuthenticatedGraphClient(Func<Task<string>> acquireAccessToken,
                                                                                  string baseUrl)
         {
-
             return new GraphServiceClient(baseUrl, new CustomAuthenticationProvider(acquireAccessToken));
         }
     }
 
-    class CustomAuthenticationProvider : IAuthenticationProvider
+    internal class CustomAuthenticationProvider : IAuthenticationProvider
     {
         public CustomAuthenticationProvider(Func<Task<string>> acquireTokenCallback)
         {

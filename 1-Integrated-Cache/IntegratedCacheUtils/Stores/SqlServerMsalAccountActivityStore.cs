@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 
 namespace IntegratedCacheUtils.Stores
 {
+    // TODO: Comment
     public class SqlServerMsalAccountActivityStore : IMsalAccountActivityStore
     {
         private IntegratedTokenCacheDbContext _dbContext;
@@ -17,6 +18,7 @@ namespace IntegratedCacheUtils.Stores
             _dbContext = dbContext;
         }
 
+        // TODO: Comment
         public async Task<IEnumerable<MsalAccountActivity>> GetMsalAccountActivitesSince(DateTime lastActivityDate)
         {
             return await _dbContext.MsalAccountActivities
@@ -25,6 +27,7 @@ namespace IntegratedCacheUtils.Stores
                 .ToListAsync();
         }
 
+        // TODO: Comment
         public async Task<MsalAccountActivity> GetMsalAccountActivityForUser(string userPrincipalName)
         {
             return await _dbContext.MsalAccountActivities
@@ -33,6 +36,7 @@ namespace IntegratedCacheUtils.Stores
                             .FirstOrDefaultAsync();
         }
 
+        // TODO: Comment
         public async Task HandleIntegratedTokenAcquisitionFailure(MsalAccountActivity failedAccountActivity)
         {
             failedAccountActivity.FailedToAcquireToken = true;
@@ -40,6 +44,7 @@ namespace IntegratedCacheUtils.Stores
             await _dbContext.SaveChangesAsync();
         }
 
+        // TODO: Comment
         public async Task UpsertMsalAccountActivity(MsalAccountActivity msalAccountActivity)
         {
             if (_dbContext.MsalAccountActivities.Count(x => x.AccountCacheKey == msalAccountActivity.AccountCacheKey) != 0)

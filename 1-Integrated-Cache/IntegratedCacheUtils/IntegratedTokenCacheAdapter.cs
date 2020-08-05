@@ -12,6 +12,7 @@ using System.Threading.Tasks;
 
 namespace IntegratedCacheUtils
 {
+    // TODO: Comment
     public class IntegratedTokenCacheAdapter : MsalDistributedTokenCacheAdapter
     {
         private readonly IServiceScopeFactory _scopeFactory;
@@ -24,6 +25,7 @@ namespace IntegratedCacheUtils
             _scopeFactory = scopeFactory;
         }
 
+        // TODO: Comment
         protected override async Task OnBeforeWriteAsync(TokenCacheNotificationArgs args)
         {
             var accountActivity = new MsalAccountActivity(args.SuggestedCacheKey, args.Account);
@@ -32,6 +34,7 @@ namespace IntegratedCacheUtils
             await Task.FromResult(base.OnBeforeWriteAsync(args));
         }
 
+        // TODO: Comment
         private async Task<MsalAccountActivity> UpsertActivity(MsalAccountActivity accountActivity)
         {
             using (var scope = _scopeFactory.CreateScope())
@@ -45,6 +48,7 @@ namespace IntegratedCacheUtils
         }
     }
 
+    // TODO: Move to its own file
     public static class IntegratedTokenCacheExtensions
     {
         /// <summary>Adds an integrated per-user .NET Core distributed based token cache.</summary>

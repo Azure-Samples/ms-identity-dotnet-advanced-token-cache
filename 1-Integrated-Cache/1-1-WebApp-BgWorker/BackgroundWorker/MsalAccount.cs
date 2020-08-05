@@ -2,6 +2,7 @@
 
 namespace BackgroundWorker
 {
+    // TODO: Comment, very well
     public class MsalAccount : IAccount
     {
         public MsalAccount() { }

@@ -8,6 +8,7 @@ using System.Text;
 
 namespace IntegratedCacheUtils.Entities
 {
+    // TODO: Comment, very well
     public class MsalAccountActivity
     {
         public MsalAccountActivity() { }
