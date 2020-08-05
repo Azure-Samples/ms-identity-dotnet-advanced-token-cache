@@ -4,7 +4,7 @@
   */
 
   "Sample": {
-    "Title": "Using integrated token cache between web app and background worker",
+    "Title": "Sharing the MSAL token cache between a web app and a background console worker app",
     "Level": 400,
     "Client": "ASP.NET Core Web App"
   },

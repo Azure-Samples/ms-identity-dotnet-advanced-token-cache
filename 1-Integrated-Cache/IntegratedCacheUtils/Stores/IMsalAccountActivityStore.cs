@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 
 namespace IntegratedCacheUtils.Stores
 {
+    // TODO: Comment
     public interface IMsalAccountActivityStore
     {
         Task UpsertMsalAccountActivity(MsalAccountActivity msalAccountActivity);

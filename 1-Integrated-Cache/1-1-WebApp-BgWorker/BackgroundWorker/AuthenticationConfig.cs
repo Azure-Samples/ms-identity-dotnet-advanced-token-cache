@@ -5,6 +5,7 @@ using System.IO;
 
 namespace BackgroundWorker
 {
+    // TODO: Comment
     public class AuthenticationConfig
     {
         /// <summary>
