@@ -1,12 +1,12 @@
-### IntegratedCacheUtils project
+# The IntegratedCacheUtils library
 
-The `IntegratedCacheUtils` project contains useful classes to achieve a token cache integration between a web app and a background worker. 
+The `IntegratedCacheUtils` project contains the classes to achieve a token cache integration between a web app and a background worker.
 
-#### MsalAccountActivity Entity
+## MsalAccountActivity Entity
 
 While the web app has a user session that can be used to distinguish who's cached token belongs to whom, the background worker doesn't have this user session concept. To facilitate this link between a user and their cache on the background worker project, we have the entity, `MsalAccountActivity.cs`, that holds enough information to create this link.
 
-#### IntegratedTokenCacheAdapter Extension
+## IntegratedTokenCacheAdapter Extension
 
 The NuGet package, [`Microsoft.Identity.Web`](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/wiki), provides many token cache adapters to be used out of the box, and one of them is the `MsalDistributedTokenCacheAdapter`. This adapter is designed to leverage the .NET distributed token cache library, and we will use it on both web app and background worker project.
 
@@ -27,6 +27,6 @@ public class IntegratedTokenCacheAdapter : MsalDistributedTokenCacheAdapter
 }
 ```
 
-#### IMsalAccountActivityStore Interface
+## IMsalAccountActivityStore Interface
 
 The `IMsalAccountActivityStore.cs` is an interface to decouple the `IntegratedTokenCacheAdapter.cs` from any specific storage source for the `MsalAccountActivity.cs` entity. Rather it be a SQL Server, MySQL, Redis database, etc, you can provide the persistency logic on the `UpsertActivity()` method and even extend the `MsalAccountActivity.cs` entity to add more properties that could be relevant to your user-case.

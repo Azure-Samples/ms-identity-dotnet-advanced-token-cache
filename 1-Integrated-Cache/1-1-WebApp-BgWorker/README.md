@@ -1,20 +1,39 @@
 ---
+page_type: sample
+author: tiagobrenck
+languages:
+  - csharp
 services: active-directory
 platforms: dotnet
-author: tiagobrenck
 level: 400
 client: ASP.NET Core Web App
 service: Microsoft Graph
 endpoint: Microsoft identity platform
+products:
+  - microsoft-authentication-library
+  - microsoft-identity-platform
+  - azure-active-directory  
+  - microsoft-graph-api
+description: "This sample demonstrates a ASP.NET Core Web App application calling The Microsoft Graph"
+
 ---
+
+![Build badge](https://identitydivision.visualstudio.com/_apis/public/build/definitions/a7934fdd-dcde-4492-a406-7fad6ac00e17/<BuildNumber>/badge)
 
 # Sharing the MSAL token cache between a web app and a background console worker app
 
+## Overview
+
+This sample shows how a web app thats signs-in users shares the signed-in users cached token with a background console application.
+
 ## Scenario
 
-A .NET Core MVC Web app that uses OpenId Connect to sign in users and then calls [Microsoft Graph](https://docs.microsoft.com/graph/overview) `/me` endpoint. It leverages the Microsoft Authentication Library [MSAL.NET](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet) to acquire an [access token](https://docs.microsoft.com/azure/active-directory/develop/access-tokens) for Graph, and the NuGet package [`Microsoft.Identity.Web`](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/wiki) to configure a distributed token cache.
+A .NET Core MVC Web app that uses the [MSAL.NET](http://aka.ms/msal-net) and [Microsoft.Identity.Web](https://aka.ms/microsoft-identity-web) libraries to sign-in users and acquire an [Access Token](https://aka.ms/access-tokens) for [Microsoft Graph](https://graph.microsoft.com). It then calls [Microsoft Graph](https://docs.microsoft.com/graph/overview) `/me` endpoint. The [Microsoft.Identity.Web](https://aka.ms/microsoft-identity-web) library is configured to cache the tokens in a [Sql Server](https://github.com/AzureAD/microsoft-identity-web/wiki/token-cache-serialization) instance. The Web app only uses [Delegated Permissions](https://docs.microsoft.com/graph/auth/auth-concepts#microsoft-graph-permissions) for its calls to Microsoft Graph.
 
-Then, a .NET Core console application that shares the same ClientId with the Web App, and can acquire a token for [Microsoft Graph](https://docs.microsoft.com/graph/overview) silently, using the access token cached from the Web App. Although this console application doesn't have user interactions, it doesn't not require *Application Permissions* to call [Microsoft Graph](https://docs.microsoft.com/graph/overview).
+Another .NET Core console application, which instead of registering itself in the Azure Portal like the Web App, instead shares the app ID (ClientId) of the Web App. It acquires the access tokens cached by the Web App for [Microsoft Graph](https://docs.microsoft.com/graph/overview) using the MSAL library.
+
+Though this console application though doesn't interact or sign-in users, it is still able to accomplish its objective of working on behalf of the users who signed-in earlier in the Web App. Also, since the console app uses cached tokens with delegated permissions only, it doesn't need to use a flow like [Client Credentials](https://docs.microsoft.com/azure/active-directory/develop/v2-oauth2-client-creds-grant-flow) which will necessitate it requesting high-privilege [Application Permissions](https://docs.microsoft.com/graph/auth/auth-concepts#microsoft-graph-permissions) which often require an [admin consent](https://docs.microsoft.com/azure/active-directory/develop/v2-admin-consent).
+
 
 ![Diagram](ReadmeFiles/diagram.png)
 
@@ -24,31 +43,92 @@ Pre-requisites:
 
 - If you want to store the token cache on a **SQL Server database**, you can easily generate the token cache table by installing the following tool using the **Developer Command Prompt for Visual Studio** (running as administrator):
 
-    ```shell
-    dotnet tool install --global dotnet-sql-cache
-    ```
+```shell
+dotnet tool install --global dotnet-sql-cache
+```
 
-- If you don't have a SQL Server database to be used in this sample yet, [please create one](https://docs.microsoft.com//sql/relational-databases/databases/create-a-database?view=sql-server-ver15). You can name it as you wish.
+- If you don't have a SQL Server database to be used in this sample yet, [please create one](https://docs.microsoft.com//sql/relational-databases/databases/create-a-database). You can name it as you wish.
 
-## Step 1: Clone the repository
+### Step 1: Navigate to the solution folder in the cloned repository
 
 From your shell or command line:
 
 ```console
-git clone https://github.com/Azure-Samples/ms-identity-dotnet-advanced-token-cache.git
+cd "1-Integrated-Cache\1-1-WebApp-BgWorker"
 ```
 
-or download and extract the repository .zip file.
+### Step 2: Register the Web App project with your Azure AD tenant
 
-> :warning: Given that the name of the sample is quiet long, and so are the names of the referenced packages, you might want to clone it in a folder close to the root of your hard drive, to avoid file size limitations on Windows.
+There is two projects in this sample, although you will only use one app registration. To register it, you can:
 
-## Step 2: Register the Web App project with your Azure AD tenant
+- either follow the step [Choose the Azure AD tenant where you want to create your applications](#choose-the-azure-ad-tenant-where-you-want-to-create-your-applications) below
+- or use PowerShell scripts that:
+  - **automatically** creates the Azure AD applications and related objects (passwords, permissions, dependencies) for you.
+  - modify the projects' configuration files.
 
-To register the Web App project with your Azure AD tenant, [please follow the step 1 in this doc](https://github.com/Azure-Samples/active-directory-aspnetcore-webapp-openidconnect-v2/tree/master/2-WebApp-graph-user/2-1-Call-MSGraph#step-1-register-the-sample-with-your-azure-ad-tenant), and name the application as you wish, for instance `IntegratedWebApp-AdvancedToken`.
+<details>
+  <summary>Expand this section if you want to use this automation:</summary>
 
-### Step 2.1: Configure the Web App project to use your app registration
+1. On Windows, run PowerShell and navigate to the root of the cloned directory
+1. In PowerShell run:
 
-Open the project in your IDE (like Visual Studio) to configure the code.
+   ```PowerShell
+   Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope Process -Force
+   ```
+
+1. Run the script to create your Azure AD application and configure the code of the sample application accordingly.
+1. In PowerShell run:
+
+   ```PowerShell
+   cd .\AppCreationScripts\
+   .\Configure.ps1
+   ```
+
+   > Other ways of running the scripts are described in [App Creation Scripts](./AppCreationScripts/AppCreationScripts.md)
+   > The scripts also provide a guide to automated application registration, configuration and removal which can help in your CI/CD scenarios.
+
+</details>
+
+Follow the steps below to manually walk through the steps to register and configure the applications in the Azure portal.
+
+### Choose the Azure AD tenant where you want to create your applications
+
+As a first step you'll need to:
+
+1. Sign in to the [Azure portal](https://portal.azure.com).
+1. If your account is present in more than one Azure AD tenant, select your profile at the top right corner in the menu on top of the page, and then **switch directory** to change your portal session to the desired Azure AD tenant..
+
+#### Register the webApp app (WebApp-SharedTokenCache)
+
+1. Navigate to the Microsoft identity platform for developers [App registrations](https://go.microsoft.com/fwlink/?linkid=2083908) page.
+1. Select **New registration**.
+1. In the **Register an application page** that appears, enter your application's registration information:
+   - In the **Name** section, enter a meaningful application name that will be displayed to users of the app, for example `WebApp-SharedTokenCache`.
+   - Under **Supported account types**, select **Accounts in any organizational directory and personal Microsoft accounts (e.g. Skype, Xbox, Outlook.com)**.
+   - In the **Redirect URI (optional)** section, select **Web** in the combo-box and enter the following redirect URI: `https://localhost:44321/signin-oidc`.
+1. Select **Register** to create the application.
+1. In the app's registration screen, find and note the **Application (client) ID**. You use this value in your app's configuration file(s) later in your code.
+1. In the app's registration screen, select **Authentication** in the menu.
+   - If you don't have a platform added, select **Add a platform** and select the **Web** option.
+   - In the **Logout URL** section, set it to `https://localhost:44321/signout-oidc`.
+1. Select **Save** to save your changes.
+1. In the app's registration screen, click on the **Certificates & secrets** blade in the left to open the page where we can generate secrets and upload certificates.
+1. In the **Client secrets** section, click on **New client secret**:
+   - Type a key description (for instance `app secret`),
+   - Select one of the available key durations (**In 1 year**, **In 2 years**, or **Never Expires**) as per your security posture.
+   - The generated key value will be displayed when you click the **Add** button. Copy the generated value for use in the steps later.
+   - You'll need this key later in your code's configuration files. This key value will not be displayed again, and is not retrievable by any other means, so make sure to note it from the Azure portal before navigating to any other screen or blade.
+1. In the app's registration screen, click on the **API permissions** blade in the left to open the page where we add access to the APIs that your application needs.
+   - Click the **Add a permission** button and then,
+   - Ensure that the **Microsoft APIs** tab is selected.
+   - In the *Commonly used Microsoft APIs* section, click on **Microsoft Graph**
+   - In the **Delegated permissions** section, select the **User.Read** in the list. Use the search box if necessary.
+   - Click on the **Add permissions** button at the bottom.
+
+#### Configure the webApp app (WebApp-SharedTokenCache) to use your app registration
+
+Open the project in your IDE (like Visual Studio or Visual Studio Code) to configure the code.
+
 >In the steps below, "ClientID" is the same as "Application ID" or "AppId".
 
 1. Open the `appsettings.json` file for the `WebApp`.
@@ -62,15 +142,15 @@ Open the project in your IDE (like Visual Studio) to configure the code.
 
 - In case you want to deploy your app in Sovereign or national clouds, ensure the `GraphApiUrl` option matches the one you want. By default this is Microsoft Graph in the Azure public cloud
 
-  ```JSon
+  ```Json
    "GraphApiUrl": "https://graph.microsoft.com/v1.0"
   ```
 
-## Step 3: Register the Background Worker project with your Azure AD tenant
+### Step 3: Register the Background Worker project with your Azure AD tenant
 
-In order to have the Web App and the Background Worker sharing the same token cache, **they must share the same application ID (clientId)** on Azure AD as well. So for this step, you will set additional configuration to the existing `IntegratedWebApp-AdvancedToken` app registration.
+In order to have the Web App and the Background Worker sharing the same token cache, **they must share the same application ID (clientId)** for Azure AD as well. So for this step, you will set additional configuration to the existing `IntegratedWebApp-AdvancedToken` app registration.
 
-1. Navigate to your `IntegratedWebApp-AdvancedToken` [App registration](https://go.microsoft.com/fwlink/?linkid=2083908) page.
+1. Navigate to your `WebApp-SharedTokenCache` [App registration](https://go.microsoft.com/fwlink/?linkid=2083908) page.
 2. In the app's registration screen, click on the **Authentication** blade in the left.
 3. In the **Authentication** section, click on **Add a platform**:
     - Choose **Mobile and desktop applications**
@@ -91,16 +171,16 @@ Open the project in your IDE (like Visual Studio) to configure the code.
    - If you will use **SQL Server**, update the key `TokenCacheDbConnStr` with the database connection string.
    - If you will use **Redis**, update the key `TokenCacheRedisConnStr` with the Redis connection string, and the key `TokenCacheRedisInstaceName` with the the Redis instance name.
 
-## Step 4: Configure the SQL Server database
+### Step 4: Configure the SQL Server database
 
 >Note: You just need to apply the Entity Framework migrations once, when you are running the sample for the very first time.
 
 This sample uses a SQL Server to store the entity `MsalAccountActivity`, and by using [Entity Framework migrations](https://docs.microsoft.com/ef/core/managing-schemas/migrations/?tabs=dotnet-core-cli), you can create the entity table scheme in your database with few steps:
 
-1. On Visual Studio, set **WebApp** as the startup project.
+1. On Visual Studio, select **WebApp** as the startup project.
 1. On Visual Studio, open the **Package Manager Console** tab.
-2. On the **Default Project** dropdown, select `IntegratedCacheUtils`.
-3. On the console, execute the command `Update-Database`. 
+1. On the **Default Project** dropdown, select `IntegratedCacheUtils`.
+1. On the console, execute the command `Update-Database`.
 
 If your solution is building without errors and you have setup the database connection string, this script will create the table `MsalAccountActivities`. If you are not using Visual Studio, please [check how to apply Entity Framework migrations via CLI](https://docs.microsoft.com/ef/core/managing-schemas/migrations/applying?tabs=dotnet-core-cli).
 
@@ -120,15 +200,15 @@ Example (note that the command can't have the escape `\` character in the connec
 dotnet sql-cache create "Data Source=(localdb)\MSSQLLocalDB;Initial Catalog=MsalTokenCacheDatabase;Integrated Security=True;" dbo TokenCache
 ```
 
-## Step 5: Run the sample
+### Step 5: Run the sample
 
 To populate the distributed token cache, and the entity `MsalAccountActivity`, the **WebApp must be executed first**. Open the WebApp on multiple browser tabs (you might want to open the tabs in incognito) and sign-in with multiple users. **Do not sign-out, otherwise their token cache will be deleted**.
 
-Once you have signed-in with at least 2 users, stop the WebApp project, **without signing them out** and execute the BackgroundWorker project.
+Once you have signed-in with at least 2 users, stop the WebApp project, **without signing them out** and execute the **BackgroundWorker** project.
 
-The background worker is returning all account activities that happened more than 30 seconds ago. You could either change the time interval or wait for it. 
+The background worker is returning all account activities that happened more than 30 seconds ago. You could either change the time interval or wait for it.
 
-With all the accounts retrieved, the background worker will print those that got their token acquired successfully and those that failed. To test a failure scenario, you can sign-out one of the users in the WebApp, and execute the background worker again. 
+With all the accounts retrieved, the background worker will print those that got their token acquired successfully and those that failed. To test a failure scenario, you can sign-out one of the users in the WebApp, and execute the background worker again.
 
 ## About The code
 
@@ -138,8 +218,8 @@ With all the accounts retrieved, the background worker will print those that got
 
 ### Web App project
 
-In the Web App project, we leverage [`Microsoft.Identity.Web`](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/wiki) to configure the authorization code flow and access token acquisition, and use 
-the `IntegratedTokenCacheAdapter.cs` as an extension for the `MsalDistributedTokenCacheAdapter`, so that before MSAL writes a token cache, we hydrate and save the `MsalAccountActivity.cs` entity. 
+In the Web App project, we leverage [`Microsoft.Identity.Web`](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/wiki) to configure the authorization code flow and access token acquisition, and use
+the `IntegratedTokenCacheAdapter.cs` as an extension for the `MsalDistributedTokenCacheAdapter`, so that before MSAL writes a token cache, we hydrate and save the `MsalAccountActivity.cs` entity.
 
 ```c#
 services.AddAuthentication(OpenIdConnectDefaults.AuthenticationScheme)

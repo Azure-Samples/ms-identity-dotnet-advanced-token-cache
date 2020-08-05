@@ -192,18 +192,18 @@ Function ConfigureApplications
     $user = Get-AzureADUser -ObjectId $creds.Account.Id
 
    # Create the webApp AAD application
-   Write-Host "Creating the AAD application (IntegratedWebApp-AdvancedToken)"
+   Write-Host "Creating the AAD application (WebApp-SharedTokenCache)"
    # Get a 2 years application key for the webApp Application
    $pw = ComputePassword
    $fromDate = [DateTime]::Now;
    $key = CreateAppKey -fromDate $fromDate -durationInYears 2 -pw $pw
    $webAppAppKey = $pw
    # create the application 
-   $webAppAadApplication = New-AzureADApplication -DisplayName "IntegratedWebApp-AdvancedToken" `
+   $webAppAadApplication = New-AzureADApplication -DisplayName "WebApp-SharedTokenCache" `
                                                   -HomePage "https://localhost:44321/" `
                                                   -LogoutUrl "https://localhost:44321/signout-oidc" `
                                                   -ReplyUrls "https://localhost:44321/signin-oidc" `
-                                                  -IdentifierUris "https://$tenantName/IntegratedWebApp-AdvancedToken" `
+                                                  -IdentifierUris "https://$tenantName/WebApp-SharedTokenCache" `
                                                   -AvailableToOtherTenants $True `
                                                   -PasswordCredentials $key `
                                                   -PublicClient $False
@@ -221,12 +221,12 @@ Function ConfigureApplications
    }
 
 
-   Write-Host "Done creating the webApp application (IntegratedWebApp-AdvancedToken)"
+   Write-Host "Done creating the webApp application (WebApp-SharedTokenCache)"
 
    # URL of the AAD application in the Azure portal
    # Future? $webAppPortalUrl = "https://portal.azure.com/#@"+$tenantName+"/blade/Microsoft_AAD_RegisteredApps/ApplicationMenuBlade/Overview/appId/"+$webAppAadApplication.AppId+"/objectId/"+$webAppAadApplication.ObjectId+"/isMSAApp/"
    $webAppPortalUrl = "https://portal.azure.com/#blade/Microsoft_AAD_RegisteredApps/ApplicationMenuBlade/CallAnAPI/appId/"+$webAppAadApplication.AppId+"/objectId/"+$webAppAadApplication.ObjectId+"/isMSAApp/"
-   Add-Content -Value "<tr><td>webApp</td><td>$currentAppId</td><td><a href='$webAppPortalUrl'>IntegratedWebApp-AdvancedToken</a></td></tr>" -Path createdApps.html
+   Add-Content -Value "<tr><td>webApp</td><td>$currentAppId</td><td><a href='$webAppPortalUrl'>WebApp-SharedTokenCache</a></td></tr>" -Path createdApps.html
 
    $requiredResourcesAccess = New-Object System.Collections.Generic.List[Microsoft.Open.AzureAD.Model.RequiredResourceAccess]
 
@@ -252,7 +252,15 @@ Function ConfigureApplications
    Write-Host "Updating the sample code ($configFile)"
    $dictionary = @{ "ClientId" = $webAppAadApplication.AppId;"TenantId" = $tenantId;"Domain" = $tenantName;"ClientSecret" = $webAppAppKey };
    UpdateTextFile -configFilePath $configFile -dictionary $dictionary
-  
+   Write-Host ""
+   Write-Host -ForegroundColor Green "------------------------------------------------------------------------------------------------" 
+   Write-Host "IMPORTANT: Please follow the instructions below to complete a few manual step(s) in the Azure portal":
+   Write-Host "- For 'webApp'"
+   Write-Host "  - Navigate to '$webAppPortalUrl'"
+   Write-Host "  - Please follow the steps in the readme , 'Register the Background Worker project with your Azure AD tenant' to add support in the app registration for the console app " -ForegroundColor Red 
+
+   Write-Host -ForegroundColor Green "------------------------------------------------------------------------------------------------" 
+     
    Add-Content -Value "</tbody></table></body></html>" -Path createdApps.html  
 }
 
