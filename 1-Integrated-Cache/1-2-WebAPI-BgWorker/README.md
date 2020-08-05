@@ -168,7 +168,7 @@ Open the project in your IDE to configure the code.
 1. Find the app key `clientId` and replace the existing value with the application ID (clientId) of the `ProfileSPA-AdvancedToken` application copied from the Azure portal.
 1. Find the app key `authority` and replace the existing value with ('https://login.microsoftonline.com/'+ $tenantId).
 1. Find the app key `apiURI` and replace the existing value with the base address of the IntegratedWebApi-AdvancedToken project (by default `https://localhost:44351/api/profile`).
-1. Find the app key `resourceScope` and replace the existing value with ScopeDefault.
+2. Find the app key `resourceScope` and replace the existing value with the `/.default` scope: `api://{client_id}/.default`. [Learn more about the /.default scope](https://docs.microsoft.com/azure/active-directory/develop/v2-permissions-and-consent#the-default-scope)
 
 #### Configure Known Client Applications for service (IntegratedWebApi-AdvancedToken)
 
