@@ -126,8 +126,10 @@ namespace BackgroundWorker
                         await _msalAccountActivityStore.HandleIntegratedTokenAcquisitionFailure(account);
 
                         Console.ForegroundColor = ConsoleColor.Red;
-                        Console.WriteLine($"Could not acquire token for account {account.AccountIdentifier}.");
+                        Console.WriteLine($"Could not acquire token for account {account.UserPrincipalName}.");
                         Console.WriteLine($"Error: {ex.Message}");
+                        Console.WriteLine("  <------------------------>  ");
+                        Console.Write(Environment.NewLine);
                         Console.ResetColor();
                     }
                     catch (Exception ex)
