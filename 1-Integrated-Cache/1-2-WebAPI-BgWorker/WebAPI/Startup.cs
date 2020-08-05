@@ -12,6 +12,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Identity.Web;
 using Microsoft.Identity.Web.TokenCacheProviders;
+using System;
 using WebAPI.Services;
 
 namespace WebAPI
@@ -49,6 +50,8 @@ namespace WebAPI
                 options.ConnectionString = Configuration.GetConnectionString("TokenCacheDbConnStr");
                 options.SchemaName = "dbo";
                 options.TableName = "TokenCache";
+                //Once expired, the cache entry is automatically deleted by Microsoft.Extensions.Caching.SqlServer library
+                options.DefaultSlidingExpiration = TimeSpan.FromHours(2); 
             });
 
             // REDIS DISTRIBUTED TOKEN CACHE

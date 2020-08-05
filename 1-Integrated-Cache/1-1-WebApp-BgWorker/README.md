@@ -135,13 +135,13 @@ If you are storing the distributed token cache on Redis, you will need to modify
 
 ## Step 5: Run the sample
 
-To populate the distributed token cache, and the entity `MsalAccountActivity`, the **WebApp must be executed first**. Open the WebApp on multiple browser tabs (you might want to open the tabs in incognito) and sign-in with multiple users. **Do not sign-out, otherwise their token cache will be deleted**.
+To populate the distributed token cache, and the entity `MsalAccountActivity`, the **WebApp must be executed first**. Open the WebApp on multiple browsers (or using the same browser but in incognito mode) and sign-in with multiple users. **Do not sign-out, otherwise their token cache will be deleted**.
 
 Once you have signed-in with at least 2 users, stop the WebApp project, **without signing them out** and execute the BackgroundWorker project.
 
-The background worker is returning all account activities that happened more than 30 seconds ago. You could either change the time interval or wait for it. 
+The background worker is returning all account activities that happened more than 30 seconds ago. You can either change the time interval or wait for it. 
 
-With all the accounts retrieved, the background worker will print those that got their token acquired successfully and those that failed. To test a failure scenario, you can sign-out one of the users in the WebApp, and execute the background worker again. 
+With all the accounts retrieved, the background worker will print those that got their token acquired successfully and those that failed. To test a failure scenario, you can sign-out one of the users in the WebApp, and execute the background worker again.
 
 ## About The code
 

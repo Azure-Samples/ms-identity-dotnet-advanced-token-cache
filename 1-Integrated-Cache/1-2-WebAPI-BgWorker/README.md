@@ -287,13 +287,13 @@ Once `npm install` is completed, you can run the SPA with the command:
 npm start
 ```
 
-Open the SPA on multiple browser tabs (you might want to open the tabs in incognito), sign-in with multiple users and click on the **Call Web API** button.
+Open the SPA on multiple browsers (or using the same browser but in incognito mode), sign-in with multiple users and click on the **Call Web API** button.
 
 Once you have signed-in with at least 2 users you can stop both SPA and WebAPI projects, and execute the BackgroundWorker project.
 
-The background worker is returning all account activities that happened more than 1 minutes ago. You could either change the time interval or wait for it. 
+The background worker is returning all account activities that happened more than 30 seconds ago. You can either change the time interval or wait for it. 
 
-With all the accounts retrieved, the background worker will print those that got their token acquired successfully and those that failed. To test a failure scenario, you can for instance, delete one of the users token cache and execute the background worker again. 
+With all the accounts retrieved, the background worker will print those that got their token acquired successfully and those that failed. To test a failure scenario, you can for instance, delete one of the users token cache and execute the background worker again, or wait for its sliding expiration time and try again (the sliding expiration is set on **Startup.cs**). 
 
 ## About The code
 

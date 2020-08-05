@@ -63,6 +63,8 @@ namespace WebApp
                 options.ConnectionString = Configuration.GetConnectionString("TokenCacheDbConnStr");
                 options.SchemaName = "dbo";
                 options.TableName = "TokenCache";
+                //Once expired, the cache entry is automatically deleted by Microsoft.Extensions.Caching.SqlServer library
+                options.DefaultSlidingExpiration = TimeSpan.FromHours(2);
             });
 
             // REDIS DISTRIBUTED TOKEN CACHE
