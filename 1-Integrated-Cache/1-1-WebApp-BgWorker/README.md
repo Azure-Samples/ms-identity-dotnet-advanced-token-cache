@@ -1,11 +1,16 @@
 ---
-services: active-directory
-platforms: dotnet
-author: tiagobrenck
-level: 400
-client: ASP.NET Core Web App
-service: Microsoft Graph
-endpoint: Microsoft identity platform
+page_type: sample
+languages:
+- csharp
+products:
+- dotnet
+- dotnet-core
+- aspnet-core
+- azure
+- azure-active-directory
+- azure-cache-redis
+- ms-graph
+description: "An ASP.Net Core sample that shows how background apps and services can access the MSAL token cache and continue to act on-behalf of users in their absence."
 ---
 
 # Sharing the MSAL token cache between a web app and a background console worker app
