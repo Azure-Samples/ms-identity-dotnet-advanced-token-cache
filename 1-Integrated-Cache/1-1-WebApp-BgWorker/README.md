@@ -114,11 +114,24 @@ If you want to store the token cache on your database as well, you must create t
 dotnet sql-cache create "Data Source=<Your-DB-connection-string>" dbo <table-name-to-be-created>
 ```
 
-Example (note that the command can't have the escape `\` character in the connection string ):
+Example (note that the command can't have the escape character `\` in the connection string):
 
 ```shell
 dotnet sql-cache create "Data Source=(localdb)\MSSQLLocalDB;Initial Catalog=MsalTokenCacheDatabase;Integrated Security=True;" dbo TokenCache
 ```
+
+### Storing the token cache on Redis
+
+>NOTE: If you are storing the token cache on SQL Server, you can skip this step.
+
+If you are storing the distributed token cache on Redis, you will need to modify the *BackgroundWorker* `Program.cs` file, and *WebAPI* `Startup.cs` file:
+
+- Open the file `Program.cs`
+  - Comment the section named **SQL SERVER CONFIG**
+  - Uncomment the section named **REDIS CONFIG**
+- Open the file `Startup.cs`
+  - Comment the section named **SQL SERVER CONFIG**
+  - Uncomment the section named **REDIS CONFIG**
 
 ## Step 5: Run the sample
 
