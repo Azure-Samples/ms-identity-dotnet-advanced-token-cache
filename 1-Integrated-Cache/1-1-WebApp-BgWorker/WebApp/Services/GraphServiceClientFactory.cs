@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace WebApp.Services
 {
-    // Factory to instantiate the GraphServiceClient to be used to call Graph 
+    // Factory to instantiate the GraphServiceClient to be used to call Graph
     public class GraphServiceClientFactory
     {
         public static GraphServiceClient GetAuthenticatedGraphClient(Func<Task<string>> acquireAccessToken,

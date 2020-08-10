@@ -41,9 +41,9 @@ namespace BackgroundWorker
         /// </summary>
         /// <remarks>Daemon applications can authenticate with AAD through two mechanisms: ClientSecret
         /// (which is a kind of application password: this property)
-        /// or a certificate previously shared with AzureAD during the application registration 
+        /// or a certificate previously shared with AzureAD during the application registration
         /// (and identified by the CertificateName property belows)
-        /// <remarks> 
+        /// <remarks>
         public string ClientSecret { get; set; }
 
         public string TokenCacheDbConnStr { get; set; }

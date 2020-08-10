@@ -13,19 +13,21 @@ description: "This sample demonstrates a ASP.NET Core Web App application callin
 
 ![Build badge](https://identitydivision.visualstudio.com/_apis/public/build/definitions/a7934fdd-dcde-4492-a406-7fad6ac00e17/<BuildNumber>/badge)
 
-# Sharing the MSAL token cache between a web app and a background console worker app
+# Share the MSAL token cache between a web app and a background console worker app
 
 ## Overview
 
-This sample shows how a web app thats signs-in users shares the signed-in users cached token with a background console application.
+This sample shows how a web app thats signs-in users can share its cache of tokens for  signed-in users with a background console application.
 
 ## Scenario
 
-A .NET Core MVC Web app that uses the [MSAL.NET](http://aka.ms/msal-net) and [Microsoft.Identity.Web](https://aka.ms/microsoft-identity-web) libraries to sign-in users and acquire an [Access Token](https://aka.ms/access-tokens) for [Microsoft Graph](https://graph.microsoft.com). It then calls [Microsoft Graph](https://docs.microsoft.com/graph/overview) `/me` endpoint. The [Microsoft.Identity.Web](https://aka.ms/microsoft-identity-web) library is configured to cache the tokens in a [Sql Server](https://github.com/AzureAD/microsoft-identity-web/wiki/token-cache-serialization) instance. The Web app only uses [Delegated Permissions](https://docs.microsoft.com/graph/auth/auth-concepts#microsoft-graph-permissions) for its calls to Microsoft Graph.
+In this sample a .NET Core MVC Web app uses the [MSAL.NET](http://aka.ms/msal-net) and [Microsoft.Identity.Web](https://aka.ms/microsoft-identity-web) libraries to sign-in users, acquire an [Access Token](https://aka.ms/access-tokens) for [Microsoft Graph](https://graph.microsoft.com) and calls the [Microsoft Graph](https://docs.microsoft.com/graph/overview) `/me` endpoint. The [Microsoft.Identity.Web](https://aka.ms/microsoft-identity-web) library is configured to cache the users tokens in a [Sql Server](https://github.com/AzureAD/microsoft-identity-web/wiki/token-cache-serialization) instance. Notably, the Web app only uses [Delegated Permissions](https://docs.microsoft.com/graph/auth/auth-concepts#microsoft-graph-permissions) for its calls to Microsoft Graph.
 
-Another .NET Core console application, which instead of registering itself in the Azure Portal like the Web App, instead shares the app ID (ClientId) of the Web App. It acquires the access tokens cached by the Web App for [Microsoft Graph](https://docs.microsoft.com/graph/overview) using the MSAL library.
+Another .NET Core console application, which in real world would constitute a background worked of the front-end web app, shares the app ID (ClientId) of the Web App and thus is able to acquire the access tokens cached earlier by the Web App for [Microsoft Graph](https://docs.microsoft.com/graph/overview) using the MSAL library.
 
-Though this console application though doesn't interact or sign-in users, it is still able to accomplish its objective of working on behalf of the users who signed-in earlier in the Web App. Also, since the console app uses cached tokens with delegated permissions only, it doesn't need to use a flow like [Client Credentials](https://docs.microsoft.com/azure/active-directory/develop/v2-oauth2-client-creds-grant-flow) which will necessitate it requesting high-privilege [Application Permissions](https://docs.microsoft.com/graph/auth/auth-concepts#microsoft-graph-permissions) which often require an [admin consent](https://docs.microsoft.com/azure/active-directory/develop/v2-admin-consent).
+This token sharing allows this console application, which doesn't interact or sign-in users itself, to be able to accomplish its objective of working on behalf of the users who signed-in earlier in the Web App.
+
+Additionally, since the console app uses cached tokens with delegated permissions only, it doesn't need to use a flow like [Client Credentials](https://docs.microsoft.com/azure/active-directory/develop/v2-oauth2-client-creds-grant-flow) which will necessitate it requesting high-privilege [Application Permissions](https://docs.microsoft.com/graph/auth/auth-concepts#microsoft-graph-permissions) which often require an [admin consent](https://docs.microsoft.com/azure/active-directory/develop/v2-admin-consent).
 
 
 ![Diagram](ReadmeFiles/diagram.png)
@@ -162,7 +164,6 @@ Open the project in your IDE (like Visual Studio) to configure the code.
    - If you will use **SQL Server**, update the key `TokenCacheDbConnStr` with the database connection string.
    - If you will use **Redis**, update the key `TokenCacheRedisConnStr` with the Redis connection string, and the key `TokenCacheRedisInstaceName` with the the Redis instance name.
 
-
 ### Storing the token cache on Redis
 
 >NOTE: If you are storing the token cache on SQL Server, you can skip this step.
@@ -182,7 +183,7 @@ To populate the distributed token cache, and the entity `MsalAccountActivity`, t
 
 Once you have signed-in with at least 2 users, stop the WebApp project, **without signing them out** and execute the **BackgroundWorker** project.
 
-The background worker is returning all account activities that happened more than 30 seconds ago. You can either change the time interval or wait for it. 
+Once running, the background worker should be returning all account activities that happened more than 30 seconds ago. You can either change the time interval or wait for it.
 
 With all the accounts retrieved, the background worker will print those that got their token acquired successfully and those that failed. To test a failure scenario, you can sign-out one of the users in the WebApp, and execute the background worker again.
 

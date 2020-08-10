@@ -1,13 +1,10 @@
 ﻿using IntegratedCacheUtils.Entities;
 using IntegratedCacheUtils.Stores;
-using Microsoft.AspNetCore.Authentication;
 using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 using Microsoft.Identity.Client;
-using Microsoft.Identity.Web.TokenCacheProviders;
 using Microsoft.Identity.Web.TokenCacheProviders.Distributed;
-using System;
 using System.Threading.Tasks;
 
 namespace IntegratedCacheUtils
@@ -21,7 +18,7 @@ namespace IntegratedCacheUtils
         public IntegratedTokenCacheAdapter(
             IServiceScopeFactory scopeFactory,
             IDistributedCache memoryCache,
-            IOptions<MsalDistributedTokenCacheAdapterOptions> cacheOptions):base(memoryCache, cacheOptions) 
+            IOptions<MsalDistributedTokenCacheAdapterOptions> cacheOptions) : base(memoryCache, cacheOptions)
         {
             _scopeFactory = scopeFactory;
         }
@@ -36,7 +33,7 @@ namespace IntegratedCacheUtils
             await Task.FromResult(base.OnBeforeWriteAsync(args));
         }
 
-        // Call the upsert method of the class that implements IMsalAccountActivityStore 
+        // Call the upsert method of the class that implements IMsalAccountActivityStore
         private async Task<MsalAccountActivity> UpsertActivity(MsalAccountActivity accountActivity)
         {
             using (var scope = _scopeFactory.CreateScope())

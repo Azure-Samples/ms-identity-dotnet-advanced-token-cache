@@ -1,16 +1,16 @@
 # The IntegratedCacheUtils library
 
-The `IntegratedCacheUtils` project contains the classes to achieve a token cache integration between a web app and a background worker.
+The `IntegratedCacheUtils` project contains the classes that are needed to achieve the token cache sharing between a web app and its background worker.
 
 ## MsalAccountActivity Entity
 
-While the web app has a user session that can be used to distinguish who's cached token belongs to whom, the background worker doesn't have this user session concept. To facilitate this link between a user and their cache on the background worker project, we have the entity, `MsalAccountActivity.cs`, that holds enough information to create this link.
+While the web app has a user session that can be used to distinguish who's cached token belongs to whom, the background worker doesn't have this facility available to it. So to overcome this limitation,  and facilitate this link between a user and their cache on the background worker project, we have the entity, `MsalAccountActivity.cs`, a representation of a Sql  table, that holds the necessary information to link a signed-in users account with their cached tokens.
 
 ## IntegratedTokenCacheAdapter Extension
 
-The NuGet package, [`Microsoft.Identity.Web`](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/wiki), provides many token cache adapters to be used out of the box, and one of them is the `MsalDistributedTokenCacheAdapter`. This adapter is designed to leverage the .NET distributed token cache library, and we will use it on both web app and background worker project.
+The NuGet package, [Microsoft.Identity.Web](https://aka.ms/microsoft-identity-web), provides multiple token cache adapters that can be used out of the box, and one of them is the `MsalDistributedTokenCacheAdapter`. This adapter is designed to leverage the .NET distributed token cache library, and we will use it on both web app and background worker project.
 
-For the web app project, however, we would like to extend the `MsalDistributedTokenCacheAdapter` and override the method `OnBeforeWriteAsync()` to hydrate and persist the entity `MsalAccountActivity.cs` so the background worker can use each account to link to its correspondent token cache.
+For the web app project, however, we extend the `MsalDistributedTokenCacheAdapter` and override the method `OnBeforeWriteAsync()` to hydrate and persist the `MsalAccountActivity.cs` entity to make this data available to the background worker.
 
 ```c#
 public class IntegratedTokenCacheAdapter : MsalDistributedTokenCacheAdapter

@@ -1,10 +1,6 @@
 ﻿using Microsoft.Identity.Client;
-using Newtonsoft.Json;
 using System;
-using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
-using System.Text;
 
 namespace IntegratedCacheUtils.Entities
 {
@@ -13,7 +9,9 @@ namespace IntegratedCacheUtils.Entities
     // Feel free to include more properties that are relevant to your use case
     public class MsalAccountActivity
     {
-        public MsalAccountActivity() { }
+        public MsalAccountActivity()
+        {
+        }
 
         public MsalAccountActivity(string cacheKey, IAccount account)
         {
@@ -27,6 +25,7 @@ namespace IntegratedCacheUtils.Entities
 
         [Key]
         public string AccountCacheKey { get; set; }
+
         public string AccountIdentifier { get; set; }
         public string AccountObjectId { get; set; }
         public string AccountTenantId { get; set; }

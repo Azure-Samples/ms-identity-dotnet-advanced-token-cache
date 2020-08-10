@@ -3,7 +3,6 @@ using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace IntegratedCacheUtils.Stores
@@ -22,7 +21,7 @@ namespace IntegratedCacheUtils.Stores
         public async Task<IEnumerable<MsalAccountActivity>> GetMsalAccountActivitesSince(DateTime lastActivityDate)
         {
             return await _dbContext.MsalAccountActivities
-                .Where(x => x.FailedToAcquireToken == false 
+                .Where(x => x.FailedToAcquireToken == false
                     && x.LastActivity <= lastActivityDate)
                 .ToListAsync();
         }
