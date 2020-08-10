@@ -7,7 +7,7 @@ products:
   - microsoft-identity-platform
   - azure-active-directory  
   - microsoft-graph-api
-description: "This sample demonstrates a ASP.NET Core Web App application calling The Microsoft Graph"
+description: "This sample demonstrates how to share the MSAL token cache between a web app and a background console worker app and continue to act on-behalf of users in their absence"
 
 ---
 
@@ -17,7 +17,7 @@ description: "This sample demonstrates a ASP.NET Core Web App application callin
 
 ## Overview
 
-This sample shows how a web app thats signs-in users can share its cache of tokens for  signed-in users with a background console application.
+This sample shows how a web app thats signs-in users can share its cache of tokens for  signed-in users with a background console application, which can continue to act on-behalf of users in their absence
 
 ## Scenario
 
@@ -186,6 +186,12 @@ Once you have signed-in with at least 2 users, stop the WebApp project, **withou
 Once running, the background worker should be returning all account activities that happened more than 30 seconds ago. You can either change the time interval or wait for it.
 
 With all the accounts retrieved, the background worker will print those that got their token acquired successfully and those that failed. To test a failure scenario, you can sign-out one of the users in the WebApp, and execute the background worker again.
+
+## Next steps: Add a Web API in this mix and extend the cache sharing.
+
+In the next tutorial, we will enhance this sample to add a Web API to the mix. This web API uses the [on-behalf of](https://docs.microsoft.com/azure/active-directory/develop/v2-oauth2-on-behalf-of-flow) to call Microsoft Graph on the signed-in user's behalf. 
+
+See [Share the MSAL token cache between a web app , its web API and a background console worker app](../1-2-WebAPI-BgWorker/README.md)
 
 ## About The code
 

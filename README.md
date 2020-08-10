@@ -14,13 +14,13 @@ description: "An ASP.Net Core sample that shows how background apps and services
 urlFragment: "ms-identity-dotnet-advanced-token-cache"
 ---
 
-# Accessing the user's token cache from background apps and services
+# Accessing the logged-in user's token cache from background apps, APIs and services
 
-This ASP.Net Core sample that shows how background apps and services can access  [MSAL's Access token cache](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/wiki/token-cache-serialization) and continue to act on-behalf of users in their absence.
+These ASP.Net Core samples show how background apps, APIs and services can access  the [MSAL's access token cache](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/wiki/token-cache-serialization) and continue to act on-behalf of users in their absence.
 
 The [MSAL.NET](http://aka.ms/msal-net) and the [Microsoft.Identity.Web](https://aka.ms/microsoft-identity-web) libraries provide various mechanisms for apps that authenticate users with the [Microsoft Identity Platform](http://aka.ms/identityplatform) to cache [Access Tokens](https://aka.ms/access-tokens) for various resources like [Microsoft Graph](https://graph.microsoft.com) to a [distributed token cache implementations like Sql Server or Redis](https://github.com/AzureAD/microsoft-identity-web/wiki/token-cache-serialization).
 
-This tutorial explains how by sharing the same App Registration in [Azure Portal](https://portal.azure.com/) (sharing the same ClientId), background processes and services can still continue to work on behalf of the user after the user has exited the frontend web app.
+This tutorial explains how by sharing the same app registration in [Azure Portal](https://portal.azure.com/) (sharing the same ClientId), background processes and services can still continue to work on behalf of the user after the user has exited the frontend web app.
 
 Today, most background processes that need to work with user's data without them being present to authenticate or re-authenticate make use of [Application Permissions](https://docs.microsoft.com/graph/auth/auth-concepts#microsoft-graph-permissions) which often require an [admin consent](https://docs.microsoft.com/azure/active-directory/develop/v2-admin-consent). This requires an elevation of privilege and is often an unnecessary hassle as the developer did not intend to obtain over what a user consents to their app.
 
@@ -47,6 +47,10 @@ git clone https://github.com/Azure-Samples/ms-identity-dotnet-advanced-token-cac
 ### Step 2
 
 Navigate to the [Sharing the MSAL token cache between a web app and a background console worker app](./1-Integrated-Cache/1-1-WebApp-BgWorker/README.md) where we'll learn about how to share the token cache between a Web App that signs-in users and a background console worker process.
+
+or
+
+Navigate to the [Share the MSAL token cache between a web app, its web API and a background console worker app](./1-Integrated-Cache\1-2-WebAPI-BgWorker\README.md") where we'll learn about how to share the token cache between a Web App that signs-in users , its backed Web API and a background console worker process.
 
 ## More information
 

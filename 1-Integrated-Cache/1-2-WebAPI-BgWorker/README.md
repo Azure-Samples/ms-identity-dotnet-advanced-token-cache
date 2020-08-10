@@ -1,25 +1,34 @@
 ---
 page_type: sample
 languages:
-- csharp
+  - csharp
 products:
-- dotnet
-- dotnet-core
-- aspnet-core
-- azure
-- azure-active-directory
-- azure-cache-redis
-- ms-graph
-description: "An ASP.Net Core sample that shows how background apps and services can access the MSAL token cache and continue to act on-behalf of users in their absence."
+  - microsoft-authentication-library
+  - microsoft-identity-platform
+  - azure-active-directory  
+  - microsoft-graph-api
+description: "An ASP.Net Core sample that shows how apps can share the token cache with their background APIs and services and continue to act on-behalf of users in their absence."
 ---
 
-# Using an integrated token cache between a web api and a background worker
+![Build badge](https://identitydivision.visualstudio.com/_apis/public/build/definitions/a7934fdd-dcde-4492-a406-7fad6ac00e17/<BuildNumber>/badge)
+
+# Share the MSAL token cache between a web app, its web API and a background console worker app
+
+## Overview
+
+This sample shows how a web app thats signs-in users can share its cache of tokens for signed-in users with is API amd background console applications, which can then continue to act on-behalf of users in their absence.
 
 ## Scenario
 
-A .NET Core Web Api protected by [Azure AD](https://azure.microsoft.com/services/active-directory/), that calls [MS Graph API](https://developer.microsoft.com/graph) on behalf of the user, using the [on-behalf-of flow](https://docs.microsoft.com/azure/active-directory/develop/v2-oauth2-on-behalf-of-flow). It leverages the Microsoft Authentication Library [MSAL.NET](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet) to acquire an [access token](https://docs.microsoft.com/azure/active-directory/develop/access-tokens) for Graph, and the NuGet package [`Microsoft.Identity.Web`](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/wiki) to configure a distributed token cache.
+In this sample a .NET Core Web Api protected by [Azure AD](https://azure.microsoft.com/services/active-directory/), that calls the [Microsoft Graph API](https://developer.microsoft.com/graph) on behalf-of users using the [on-behalf-of flow](https://docs.microsoft.com/azure/active-directory/develop/v2-oauth2-on-behalf-of-flow). 
 
-Then, a .NET Core console application that shares the same ClientId with the Web Api, and can acquire a token for [Microsoft Graph](https://docs.microsoft.com/graph/overview) silently, using the access token cached from the Web Api. Although this console application doesn't have user interactions, it doesn't not require *Application Permissions* to call [Microsoft Graph](https://docs.microsoft.com/graph/overview).
+It uses the [MSAL.NET](http://aka.ms/msal-net) and [Microsoft.Identity.Web](https://aka.ms/microsoft-identity-web) libraries to sign-in users, acquire an [access token](https://aka.ms/access-tokens) for [Microsoft Graph](https://graph.microsoft.com) and calls the [Microsoft Graph](https://docs.microsoft.com/graph/overview) `/me` endpoint. The [Microsoft.Identity.Web](https://aka.ms/microsoft-identity-web) library is configured to cache the users tokens in a [Sql Server](https://github.com/AzureAD/microsoft-identity-web/wiki/token-cache-serialization) instance.
+
+Another .NET Core console application, which in real world would constitute a background worked of the front-end web app, shares the app ID (ClientId) of the Web App and the Web API and thus is able to acquire the access tokens cached earlier by the Web App for [Microsoft Graph](https://docs.microsoft.com/graph/overview) using the MSAL library.
+
+This token sharing allows this console application, which doesn't interact or sign-in users itself, to be able to accomplish its objective of working on behalf of the users who signed-in earlier in the Web App.
+
+Additionally, since the console app uses cached tokens with delegated permissions only, it doesn't need to use a flow like [Client Credentials](https://docs.microsoft.com/azure/active-directory/develop/v2-oauth2-client-creds-grant-flow) which will necessitate it requesting high-privilege [Application Permissions](https://docs.microsoft.com/graph/auth/auth-concepts#microsoft-graph-permissions) which often require an [admin consent](https://docs.microsoft.com/azure/active-directory/develop/v2-admin-consent).
 
 ![Diagram](ReadmeFiles/diagram.png)
 
@@ -27,22 +36,19 @@ Then, a .NET Core console application that shares the same ClientId with the Web
 
 Pre-requisites:
 
-- If you want to store the token cache on a **SQL Server database**, you can easily generate the token cache table by installing the following tool using the **Developer Command Prompt for Visual Studio** (running as administrator): 
+- If you want to store the token cache on a **SQL Server database**, you can easily generate the token cache table by installing the following tool using the **Developer Command Prompt for Visual Studio** (running as administrator):
+
     ```shell
     dotnet tool install --global dotnet-sql-cache
-    ``` 
+    ```
 
 ## Step 1: Clone the repository
 
-From your shell or command line:
+From your shell or command line, navigate to the following folder in the repository you cloned earlier
 
 ```console
-git clone https://github.com/Azure-Samples/ms-identity-dotnet-advanced-token-cache.git
+cd "1-Integrated-Cache\1-2-WebAPI-BgWorker"
 ```
-
-or download and extract the repository .zip file.
-
-> :warning: Given that the name of the sample is quiet long, and so are the names of the referenced packages, you might want to clone it in a folder close to the root of your hard drive, to avoid file size limitations on Windows.
 
 ## Step 2: App Registration
 
