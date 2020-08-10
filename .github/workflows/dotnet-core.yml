@@ -17,7 +17,7 @@ jobs:
       uses: actions/setup-dotnet@v1
       with:
         dotnet-version: 3.1.301
-    - name: Build 1-1-WebApp-BgWorker
-      run: dotnet build --configuration Release .\1-Integrated-Cache\1-1-WebApp-BgWorker\IntegratedCache.sln
-    - name: Build 1-2-WebApi-BgWorker
-      run: dotnet build --configuration Release .\1-Integrated-Cache\1-2-WebApi-BgWorker\IntegratedCache.sln
+    - name: Build 1-1-WebApp-BgWorker-WebApp
+      run: dotnet build --configuration Release ..\..\1-Integrated-Cache\1-1-WebApp-BgWorker\WebApp\WebApp.sln
+    - name: Build 1-1-WebApp-BgWorker-BgWorker
+      run: dotnet build --configuration Release ..\..\1-Integrated-Cache\1-1-WebApp-BgWorker\BackgroundWorker\BackgroundWorker.csproj
