@@ -19,7 +19,7 @@ jobs:
         dotnet-version: 3.1.301
     - name: Install dependencies
       run: dotnet restore
-    - name: Build
-      run: dotnet build --configuration Release --no-restore
-    - name: Test
-      run: dotnet test --no-restore --verbosity normal
+    - name: Build 1-1-WebApp-BgWorker
+      run: dotnet build --configuration Release .\1-Integrated-Cache\1-1-WebApp-BgWorker\IntegratedCache.sln
+    - name: Build 1-2-WebApi-BgWorker
+      run: dotnet build --configuration Release .\1-Integrated-Cache\1-2-WebApi-BgWorker\IntegratedCache.sln
