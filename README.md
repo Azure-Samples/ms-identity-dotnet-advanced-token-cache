@@ -14,6 +14,8 @@ description: "An ASP.Net Core sample that shows how background apps and services
 urlFragment: "ms-identity-dotnet-advanced-token-cache"
 ---
 
+![.NET Core](https://github.com/Azure-Samples/ms-identity-dotnet-advanced-token-cache/workflows/.NET%20Core/badge.svg)
+
 # Accessing the user's token cache from background apps and services
 
 This ASP.Net Core sample that shows how background apps and services can access  [MSAL's Access token cache](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/wiki/token-cache-serialization) and continue to act on-behalf of users in their absence.
