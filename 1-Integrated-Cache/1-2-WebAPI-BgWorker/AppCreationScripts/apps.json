@@ -1,0 +1,37 @@
+{
+  /*
+  This section describes the Azure AD  Applications to configure, and their dependencies
+  */
+
+  "Sample": {
+    "Title": "Using integrated token cache between web api and background worker",
+    "Level": 400,
+    "Client": "ASP.NET Core Web Api"
+  },
+  "AppRegistrations": [
+    {
+      "x-ms-id": "ms-identity-dotnet-advanced-token-cache",
+      "x-ms-name": "ms-identity-dotnet-advanced-token-cache",
+      "x-ms-version": "2.0",
+      "replyUrlsWithType": [
+        {
+          "url": "https://login.microsoftonline.com/common/oauth2/nativeclient",
+          "type": "InstalledClient"
+        }
+      ],
+      "requiredResourceAccess": [
+        {
+          "x-ms-resourceAppName": "Microsoft Graph",
+          "resourceAppId": "00000003-0000-0000-c000-000000000000",
+          "resourceAccess": [
+            {
+              "id": "e1fe6dd8-ba31-4d61-89e7-88639da4683d",
+              "type": "Scope",
+              "x-ms-name": "user.read"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
