@@ -31,7 +31,7 @@ namespace WebAPI
         public void ConfigureServices(IServiceCollection services)
         {
             // Add Sql Server as Token cache store
-            services.AddDbContext<IntegratedTokenCacheDbContext>(options => 
+            services.AddDbContext<IntegratedTokenCacheDbContext>(options =>
                 options.UseSqlServer(Configuration.GetConnectionString("TokenCacheDbConnStr")));
 
             // Configure the dependency injection for IMsalAccountActivityStore to use a SQL Server to store the entity MsalAccountActivity.
@@ -59,7 +59,7 @@ namespace WebAPI
                 options.SchemaName = "dbo";
                 options.TableName = "TokenCache";
                 //Once expired, the cache entry is automatically deleted by Microsoft.Extensions.Caching.SqlServer library
-                options.DefaultSlidingExpiration = TimeSpan.FromHours(2); 
+                options.DefaultSlidingExpiration = TimeSpan.FromHours(2);
             });
 
             // Add Redis as distributed Token cache store
@@ -144,3 +144,4 @@ namespace WebAPI
             process.WaitForExit();
         }
     }
+}

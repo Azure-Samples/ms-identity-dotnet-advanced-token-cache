@@ -5,12 +5,10 @@
     "dependencies": {
         "@azure/msal-browser": "^2.0.0-beta.4",
         "bootstrap": "^4.5.0",
-        "prop-types": "^15.7.2",
         "react": "^16.13.1",
-        "react-app-polyfill": "^1.0.1",
         "react-bootstrap": "^1.2.2",
         "react-dom": "^16.13.1",
-        "react-scripts": "^3.4.1"
+        "react-scripts": "^3.4.3"
     },
     "scripts": {
         "start": "react-scripts start",
