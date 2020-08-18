@@ -14,7 +14,6 @@
       "Name": "WebApi-SharedTokenCache",
       "Kind": "WebApi",
       "Audience": "AzureADMyOrg",
-      "ReplyUrls":"https://login.microsoftonline.com/common/oauth2/nativeclient",
       "HomePage": "https://localhost:44351/api/profile",
       "PasswordCredentials": "Auto",
       "RequiredResourcesAccess": [
@@ -25,7 +24,7 @@
       ],
       "ManualSteps": [
         {
-          "Comment": "Navigate to the WebApi-SharedTokenCache App Registration page, delete the Web platform and add the Single-page application. It cannot have both!"
+          "Comment": "Please follow through the manual steps outlined in 'Step 3. '"
         }
       ]
     },
