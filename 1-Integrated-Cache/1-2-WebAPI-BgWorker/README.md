@@ -252,7 +252,7 @@ This behavior is expected as you are not authenticated and the WebApi doesn't ha
 
 ### Step 4.2: Run and Install SPA dependencies
 
-Using a command line interface such as VS Code integrated terminal, locate the application directory and execute the following command: 
+Using a command line interface such as VS Code integrated terminal, locate the application directory and execute the following command:
 
 ```console
 cd ../
@@ -266,13 +266,15 @@ Once `npm install` is completed, you can run the SPA with the command:
 npm start
 ```
 
-Open the SPA on multiple browsers (or using the same browser but in incognito mode), sign-in with multiple users and click on the **Call Web API** button.
+Open the SPA in either different browsers or use the same browser but in incognito mode, sign-in with multiple users and click on the **Call Web API** button.
 
 Once you have signed-in with at least 2 users you can stop both SPA and WebAPI projects, and execute the BackgroundWorker project.
 
-The background worker is returning all account activities that happened more than 30 seconds ago. You can either change the time interval or wait for it. 
+Once running, the background worker should be returning all account activities that happened more than 30 seconds ago. You can either change the time interval or wait for it.
 
-With all the accounts retrieved, the background worker will print those that got their token acquired successfully and those that failed. To test a failure scenario, you can for instance, delete one of the users token cache and execute the background worker again, or wait for its sliding expiration time and try again (the sliding expiration is set on **Startup.cs**). 
+With all the accounts retrieved, the background worker will print those that got their token acquired successfully and those that failed. To test a failure scenario, you can sign-out one of the users in the WebApp, and execute the background worker again.
+
+With all the accounts retrieved, the background worker will print those that got their token acquired successfully and those that failed. To test a failure scenario, you can for instance, delete one of the users token cache DB and execute the background worker again, or wait for its sliding expiration time and try again (the sliding expiration is set on **Startup.cs**).
 
 ## About The code
 
