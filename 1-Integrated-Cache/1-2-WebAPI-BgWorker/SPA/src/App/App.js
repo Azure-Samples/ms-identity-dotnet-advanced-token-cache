@@ -88,12 +88,4 @@ class App extends React.Component {
     }
 }
 
-App.propTypes = {
-    account: PropTypes.object,
-    error: PropTypes.string,
-    isAuthenticated: PropTypes.bool,
-    signIn: PropTypes.func.isRequired,
-    signOut: PropTypes.func.isRequired,
-    acquireToken: PropTypes.func.isRequired,
-}
 export default AuthProvider(App);
