@@ -268,7 +268,6 @@ Function ConfigureApplications
    # create the application 
    $serviceAadApplication = New-AzureADApplication -DisplayName "WebApi-SharedTokenCache" `
                                                    -HomePage "https://localhost:44351/api/profile" `
-                                                   -ReplyUrls "https://login.microsoftonline.com/common/oauth2/nativeclient" `
                                                    -PasswordCredentials $key `
                                                    -PublicClient $False
 
@@ -416,7 +415,10 @@ Function ConfigureApplications
    Write-Host "IMPORTANT: Please follow the instructions below to complete a few manual step(s) in the Azure portal":
    Write-Host "- For 'service'"
    Write-Host "  - Navigate to '$servicePortalUrl'"
-   Write-Host "  - Navigate to the WebApi-SharedTokenCache App Registration page, delete the Web platform and add the Single-page application. It cannot have both!" -ForegroundColor Red 
+   Write-Host "  - Please follow through the manual steps outlined in 'Step 3: Register the Background Worker project with your Azure AD tenant' of the README.MD" -ForegroundColor Red 
+   Write-Host "- For 'client'"
+   Write-Host "  - Navigate to '$clientPortalUrl'"
+   Write-Host "  - In the 'ProfileSPA-SharedTokenCache' registration's authentication blade, change the  app type to 'Single Page App' as explained in the step 'Step 2.2: Register the client app (ProfileSPA-SharedTokenCache)' of the README.MD. The PowerShell registers it as a 'Web' app." -ForegroundColor Red 
 
    Write-Host -ForegroundColor Green "------------------------------------------------------------------------------------------------" 
      

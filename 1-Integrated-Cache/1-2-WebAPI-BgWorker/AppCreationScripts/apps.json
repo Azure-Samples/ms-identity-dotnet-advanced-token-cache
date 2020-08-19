@@ -9,11 +9,6 @@
       "x-ms-id": "service",
       "x-ms-name": "WebApi-SharedTokenCache",
       "x-ms-version": "2.0",
-      "replyUrlsWithType": [
-        {
-          "url": "https://login.microsoftonline.com/common/oauth2/nativeclient",
-          "type": "Web"
-        } ],
       "oauth2AllowImplicitFlow": false,
       "oauth2AllowIdTokenImplicitFlow": false,
       "requiredResourceAccess": [

@@ -24,7 +24,7 @@
       ],
       "ManualSteps": [
         {
-          "Comment": "Please follow through the manual steps outlined in 'Step 3. '"
+          "Comment": "Please follow through the manual steps outlined in 'Step 3: Register the Background Worker project with your Azure AD tenant' of the README.MD"
         }
       ]
     },
@@ -44,6 +44,11 @@
 					"Resource": "service",
 					"DelegatedPermissions": [ "access_as_user" ]
 				}
+      ],
+      "ManualSteps": [
+        {
+          "Comment": "In the 'ProfileSPA-SharedTokenCache' registration's authentication blade, change the  app type to 'Single Page App' as explained in the step 'Step 2.2: Register the client app (ProfileSPA-SharedTokenCache)' of the README.MD. The PowerShell registers it as a 'Web' app."
+        }
       ]
     }
   ],
