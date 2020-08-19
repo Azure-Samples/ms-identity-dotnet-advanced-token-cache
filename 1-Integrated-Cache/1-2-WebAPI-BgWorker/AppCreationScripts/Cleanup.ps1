@@ -59,9 +59,9 @@ Function Cleanup
     # Removes the applications
     Write-Host "Cleaning-up applications from tenant '$tenantName'"
 
-    Write-Host "Removing 'service' (IntegratedWebApi-AdvancedToken) if needed"
-    Get-AzureADApplication -Filter "DisplayName eq 'IntegratedWebApi-AdvancedToken'"  | ForEach-Object {Remove-AzureADApplication -ObjectId $_.ObjectId }
-    $apps = Get-AzureADApplication -Filter "DisplayName eq 'IntegratedWebApi-AdvancedToken'"
+    Write-Host "Removing 'service' (WebApi-SharedTokenCache) if needed"
+    Get-AzureADApplication -Filter "DisplayName eq 'WebApi-SharedTokenCache'"  | ForEach-Object {Remove-AzureADApplication -ObjectId $_.ObjectId }
+    $apps = Get-AzureADApplication -Filter "DisplayName eq 'WebApi-SharedTokenCache'"
     if ($apps)
     {
         Remove-AzureADApplication -ObjectId $apps.ObjectId
@@ -70,14 +70,14 @@ Function Cleanup
     foreach ($app in $apps) 
     {
         Remove-AzureADApplication -ObjectId $app.ObjectId
-        Write-Host "Removed IntegratedWebApi-AdvancedToken.."
+        Write-Host "Removed WebApi-SharedTokenCache.."
     }
     # also remove service principals of this app
-    Get-AzureADServicePrincipal -filter "DisplayName eq 'IntegratedWebApi-AdvancedToken'" | ForEach-Object {Remove-AzureADServicePrincipal -ObjectId $_.Id -Confirm:$false}
+    Get-AzureADServicePrincipal -filter "DisplayName eq 'WebApi-SharedTokenCache'" | ForEach-Object {Remove-AzureADServicePrincipal -ObjectId $_.Id -Confirm:$false}
     
-    Write-Host "Removing 'client' (ProfileSPA-AdvancedToken) if needed"
-    Get-AzureADApplication -Filter "DisplayName eq 'ProfileSPA-AdvancedToken'"  | ForEach-Object {Remove-AzureADApplication -ObjectId $_.ObjectId }
-    $apps = Get-AzureADApplication -Filter "DisplayName eq 'ProfileSPA-AdvancedToken'"
+    Write-Host "Removing 'client' (ProfileSPA-SharedTokenCache) if needed"
+    Get-AzureADApplication -Filter "DisplayName eq 'ProfileSPA-SharedTokenCache'"  | ForEach-Object {Remove-AzureADApplication -ObjectId $_.ObjectId }
+    $apps = Get-AzureADApplication -Filter "DisplayName eq 'ProfileSPA-SharedTokenCache'"
     if ($apps)
     {
         Remove-AzureADApplication -ObjectId $apps.ObjectId
@@ -86,10 +86,10 @@ Function Cleanup
     foreach ($app in $apps) 
     {
         Remove-AzureADApplication -ObjectId $app.ObjectId
-        Write-Host "Removed ProfileSPA-AdvancedToken.."
+        Write-Host "Removed ProfileSPA-SharedTokenCache.."
     }
     # also remove service principals of this app
-    Get-AzureADServicePrincipal -filter "DisplayName eq 'ProfileSPA-AdvancedToken'" | ForEach-Object {Remove-AzureADServicePrincipal -ObjectId $_.Id -Confirm:$false}
+    Get-AzureADServicePrincipal -filter "DisplayName eq 'ProfileSPA-SharedTokenCache'" | ForEach-Object {Remove-AzureADServicePrincipal -ObjectId $_.Id -Confirm:$false}
     
 }
 

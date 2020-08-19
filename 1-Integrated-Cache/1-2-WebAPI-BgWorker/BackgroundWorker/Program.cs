@@ -76,7 +76,7 @@ namespace BackgroundWorker
             var scopes = new string[] { "User.Read" };
 
             // Return the MsalAccountActivities of the users that you would like to acquire a token silently
-            var someTimeAgo = DateTime.Now.AddMinutes(-1);
+            var someTimeAgo = DateTime.Now.AddSeconds(-30);
             var accountsToAcquireToken = await _msalAccountActivityStore.GetMsalAccountActivitesSince(someTimeAgo);
 
             // Or you could also return the account activity of a particular user

@@ -259,17 +259,18 @@ Function ConfigureApplications
     $user = Get-AzureADUser -ObjectId $creds.Account.Id
 
    # Create the service AAD application
-   Write-Host "Creating the AAD application (IntegratedWebApi-AdvancedToken)"
+   Write-Host "Creating the AAD application (WebApi-SharedTokenCache)"
    # Get a 2 years application key for the service Application
    $pw = ComputePassword
    $fromDate = [DateTime]::Now;
    $key = CreateAppKey -fromDate $fromDate -durationInYears 2 -pw $pw
    $serviceAppKey = $pw
    # create the application 
-   $serviceAadApplication = New-AzureADApplication -DisplayName "IntegratedWebApi-AdvancedToken" `
+   $serviceAadApplication = New-AzureADApplication -DisplayName "WebApi-SharedTokenCache" `
                                                    -HomePage "https://localhost:44351/api/profile" `
                                                    -PasswordCredentials $key `
                                                    -PublicClient $False
+
    $serviceIdentifierUri = 'api://'+$serviceAadApplication.AppId
    Set-AzureADApplication -ObjectId $serviceAadApplication.ObjectId -IdentifierUris $serviceIdentifierUri
 
@@ -285,7 +286,7 @@ Function ConfigureApplications
         Write-Host "'$($user.UserPrincipalName)' added as an application owner to app '$($serviceServicePrincipal.DisplayName)'"
    }
 
-    # rename the access_as_user scope if it exists to match the readme steps or add a new scope
+    # rename the user_impersonation scope if it exists to match the readme steps or add a new scope
     $scopes = New-Object System.Collections.Generic.List[Microsoft.Open.AzureAD.Model.OAuth2Permission]
    
     if ($scopes.Count -ge 0) 
@@ -303,9 +304,9 @@ Function ConfigureApplications
         {
             # Add scope
             $scope = CreateScope -value "access_as_user"  `
-                -userConsentDisplayName "Access IntegratedWebApi-AdvancedToken"  `
-                -userConsentDescription "Allow the application to access IntegratedWebApi-AdvancedToken on your behalf."  `
-                -adminConsentDisplayName "Access IntegratedWebApi-AdvancedToken"  `
+                -userConsentDisplayName "Access WebApi-SharedTokenCache"  `
+                -userConsentDescription "Allow the application to access WebApi-SharedTokenCache on your behalf."  `
+                -adminConsentDisplayName "Access WebApi-SharedTokenCache"  `
                 -adminConsentDescription "Allows the app to have the same access to information in the directory on behalf of the signed-in user."
             
             $scopes.Add($scope)
@@ -315,12 +316,12 @@ Function ConfigureApplications
     # add/update scopes
     Set-AzureADApplication -ObjectId $serviceAadApplication.ObjectId -OAuth2Permission $scopes
 
-   Write-Host "Done creating the service application (IntegratedWebApi-AdvancedToken)"
+   Write-Host "Done creating the service application (WebApi-SharedTokenCache)"
 
    # URL of the AAD application in the Azure portal
    # Future? $servicePortalUrl = "https://portal.azure.com/#@"+$tenantName+"/blade/Microsoft_AAD_RegisteredApps/ApplicationMenuBlade/Overview/appId/"+$serviceAadApplication.AppId+"/objectId/"+$serviceAadApplication.ObjectId+"/isMSAApp/"
    $servicePortalUrl = "https://portal.azure.com/#blade/Microsoft_AAD_RegisteredApps/ApplicationMenuBlade/CallAnAPI/appId/"+$serviceAadApplication.AppId+"/objectId/"+$serviceAadApplication.ObjectId+"/isMSAApp/"
-   Add-Content -Value "<tr><td>service</td><td>$currentAppId</td><td><a href='$servicePortalUrl'>IntegratedWebApi-AdvancedToken</a></td></tr>" -Path createdApps.html
+   Add-Content -Value "<tr><td>service</td><td>$currentAppId</td><td><a href='$servicePortalUrl'>WebApi-SharedTokenCache</a></td></tr>" -Path createdApps.html
 
    $requiredResourcesAccess = New-Object System.Collections.Generic.List[Microsoft.Open.AzureAD.Model.RequiredResourceAccess]
 
@@ -336,12 +337,12 @@ Function ConfigureApplications
    Write-Host "Granted permissions."
 
    # Create the client AAD application
-   Write-Host "Creating the AAD application (ProfileSPA-AdvancedToken)"
+   Write-Host "Creating the AAD application (ProfileSPA-SharedTokenCache)"
    # create the application 
-   $clientAadApplication = New-AzureADApplication -DisplayName "ProfileSPA-AdvancedToken" `
+   $clientAadApplication = New-AzureADApplication -DisplayName "ProfileSPA-SharedTokenCache" `
                                                   -HomePage "http://localhost:3000" `
                                                   -ReplyUrls "http://localhost:3000" `
-                                                  -IdentifierUris "https://$tenantName/ProfileSPA-AdvancedToken" `
+                                                  -IdentifierUris "https://$tenantName/ProfileSPA-SharedTokenCache" `
                                                   -PublicClient $False
 
    # create the service principal of the newly created application 
@@ -357,12 +358,12 @@ Function ConfigureApplications
    }
 
 
-   Write-Host "Done creating the client application (ProfileSPA-AdvancedToken)"
+   Write-Host "Done creating the client application (ProfileSPA-SharedTokenCache)"
 
    # URL of the AAD application in the Azure portal
    # Future? $clientPortalUrl = "https://portal.azure.com/#@"+$tenantName+"/blade/Microsoft_AAD_RegisteredApps/ApplicationMenuBlade/Overview/appId/"+$clientAadApplication.AppId+"/objectId/"+$clientAadApplication.ObjectId+"/isMSAApp/"
    $clientPortalUrl = "https://portal.azure.com/#blade/Microsoft_AAD_RegisteredApps/ApplicationMenuBlade/CallAnAPI/appId/"+$clientAadApplication.AppId+"/objectId/"+$clientAadApplication.ObjectId+"/isMSAApp/"
-   Add-Content -Value "<tr><td>client</td><td>$currentAppId</td><td><a href='$clientPortalUrl'>ProfileSPA-AdvancedToken</a></td></tr>" -Path createdApps.html
+   Add-Content -Value "<tr><td>client</td><td>$currentAppId</td><td><a href='$clientPortalUrl'>ProfileSPA-SharedTokenCache</a></td></tr>" -Path createdApps.html
 
    $requiredResourcesAccess = New-Object System.Collections.Generic.List[Microsoft.Open.AzureAD.Model.RequiredResourceAccess]
 
@@ -375,7 +376,7 @@ Function ConfigureApplications
 
    # Add Required Resources Access (from 'client' to 'service')
    Write-Host "Getting access from 'client' to 'service'"
-   $requiredPermissions = GetRequiredPermissions -applicationDisplayName "IntegratedWebApi-AdvancedToken" `
+   $requiredPermissions = GetRequiredPermissions -applicationDisplayName "WebApi-SharedTokenCache" `
                                                 -requiredDelegatedPermissions "access_as_user" `
 
    $requiredResourcesAccess.Add($requiredPermissions)
@@ -412,9 +413,12 @@ Function ConfigureApplications
    Write-Host ""
    Write-Host -ForegroundColor Green "------------------------------------------------------------------------------------------------" 
    Write-Host "IMPORTANT: Please follow the instructions below to complete a few manual step(s) in the Azure portal":
+   Write-Host "- For 'service'"
+   Write-Host "  - Navigate to '$servicePortalUrl'"
+   Write-Host "  - Please follow through the manual steps outlined in 'Step 3: Register the Background Worker project with your Azure AD tenant' of the README.MD" -ForegroundColor Red 
    Write-Host "- For 'client'"
    Write-Host "  - Navigate to '$clientPortalUrl'"
-   Write-Host "  - Navigate to the IntegratedWebApi-AdvancedToken App Registration page, delete the Web platform and add the Single-page application. It cannot have both!" -ForegroundColor Red 
+   Write-Host "  - In the 'ProfileSPA-SharedTokenCache' registration's authentication blade, change the  app type to 'Single Page App' as explained in the step 'Step 2.2: Register the client app (ProfileSPA-SharedTokenCache)' of the README.MD. The PowerShell registers it as a 'Web' app." -ForegroundColor Red 
 
    Write-Host -ForegroundColor Green "------------------------------------------------------------------------------------------------" 
      

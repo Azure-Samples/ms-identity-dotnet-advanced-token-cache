@@ -1,6 +1,6 @@
 {
   "Sample": {
-    "Title": "Using integrated token cache between web api and background worker",
+    "Title": "Share the MSAL token cache between a web API and a background console worker app",
     "Level": 400,
     "Client": "ASP.NET Core Web Api",
     "Service": "Microsoft Graph",
@@ -11,7 +11,7 @@
   "AADApps": [
     {
       "Id": "service",
-      "Name": "IntegratedWebApi-AdvancedToken",
+      "Name": "WebApi-SharedTokenCache",
       "Kind": "WebApi",
       "Audience": "AzureADMyOrg",
       "HomePage": "https://localhost:44351/api/profile",
@@ -21,11 +21,16 @@
           "Resource": "Microsoft Graph",
           "DelegatedPermissions": [ "User.Read" ]
         }
+      ],
+      "ManualSteps": [
+        {
+          "Comment": "Please follow through the manual steps outlined in 'Step 3: Register the Background Worker project with your Azure AD tenant' of the README.MD"
+        }
       ]
     },
     {
       "Id": "client",
-      "Name": "ProfileSPA-AdvancedToken",
+      "Name": "ProfileSPA-SharedTokenCache",
       "Kind": "SinglePageApplication",
       "Audience": "AzureADMyOrg",
       "HomePage": "http://localhost:3000",
@@ -42,7 +47,7 @@
       ],
       "ManualSteps": [
         {
-          "Comment": "Navigate to the IntegratedWebApi-AdvancedToken App Registration page, delete the Web platform and add the Single-page application. It cannot have both!"
+          "Comment": "In the 'ProfileSPA-SharedTokenCache' registration's authentication blade, change the  app type to 'Single Page App' as explained in the step 'Step 2.2: Register the client app (ProfileSPA-SharedTokenCache)' of the README.MD. The PowerShell registers it as a 'Web' app."
         }
       ]
     }
