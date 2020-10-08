@@ -276,6 +276,8 @@ With all the accounts retrieved, the background worker will print those that got
 
 With all the accounts retrieved, the background worker will print those that got their token acquired successfully and those that failed. To test a failure scenario, you can for instance, delete one of the users token cache DB and execute the background worker again, or wait for its sliding expiration time and try again (the sliding expiration is set on **Startup.cs**).
 
+> [Consider taking a moment to share your experience with us.](https://forms.office.com/Pages/ResponsePage.aspx?id=v4j5cvGGr0GRqy180BHbR73pcsbpbxNJuZCMKN0lURpUM0FERTFGTjlKVUVWTzNINjdMTkFWTE43UiQlQCN0PWcu)
+
 ## About The code
 
 ### IntegratedCacheUtils project
