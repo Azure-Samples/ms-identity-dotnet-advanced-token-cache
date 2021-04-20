@@ -52,7 +52,7 @@ Navigate to the [Sharing the MSAL token cache between a web app and a background
 
 or
 
-Navigate to the [Share the MSAL token cache between a web app, its web API and a background console worker app](./1-Integrated-Cache\1-2-WebAPI-BgWorker\README.md") tutorial where we'll learn about how to share the token cache between a Web App that signs-in users, its backed Web API and a background console worker process.
+Navigate to the [Share the MSAL token cache between a web app, its web API and a background console worker app](./1-Integrated-Cache/1-2-WebAPI-BgWorker/README.md") tutorial where we'll learn about how to share the token cache between a Web App that signs-in users, its backed Web API and a background console worker process.
 
 ## More information
 
