@@ -55,6 +55,7 @@ namespace WebApp
                 .AddIntegratedUserTokenCache();
 
             // Add Sql Server as distributed Token cache store
+            // This config should match that of the BackgroundWorker
             services.AddDistributedSqlServerCache(options =>
             {
                 /*
