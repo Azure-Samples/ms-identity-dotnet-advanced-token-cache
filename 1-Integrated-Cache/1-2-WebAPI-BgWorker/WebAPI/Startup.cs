@@ -49,6 +49,8 @@ namespace WebAPI
             services.AddMicrosoftGraph(Configuration, new string[] { "user.read" });
 
             // Add Sql Server as distributed Token cache store
+            // This config should match that of the BackgroundWorker
+
             services.AddDistributedSqlServerCache(options =>
             {
                 /*

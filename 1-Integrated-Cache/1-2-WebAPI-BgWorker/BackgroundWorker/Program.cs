@@ -35,6 +35,8 @@ namespace BackgroundWorker
                         options.ConnectionString = config.TokenCacheDbConnStr;
                         options.SchemaName = "dbo";
                         options.TableName = "TokenCache";
+                        options.DefaultSlidingExpiration = TimeSpan.FromHours(2);
+
                     })
                     .AddDbContext<IntegratedTokenCacheDbContext>(options => options.UseSqlServer(config.TokenCacheDbConnStr))
                     //.AddSingleton<IMsalTokenCacheProvider, BackgroundWorkerTokenCacheAdapter>()
