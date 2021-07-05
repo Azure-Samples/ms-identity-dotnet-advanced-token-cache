@@ -3,6 +3,7 @@ using IntegratedCacheUtils.Stores;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Options;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Web.TokenCacheProviders;
@@ -11,6 +12,7 @@ using System;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Logging;
 
 namespace BackgroundWorker
 {
@@ -90,7 +92,6 @@ namespace BackgroundWorker
                 Console.WriteLine($"No accounts returned");
                 Console.ResetColor();
             }
-
             else
             {
                 Console.WriteLine($"Trying to acquire token silently for {accountsToAcquireToken.Count()} activities...");
@@ -103,7 +104,8 @@ namespace BackgroundWorker
                 {
                     var msalCache = new BackgroundWorkerTokenCacheAdapter(account.AccountCacheKey,
                         _serviceProvider.GetService<IDistributedCache>(),
-                        _serviceProvider.GetService<IOptions<MsalDistributedTokenCacheAdapterOptions>>());
+                        _serviceProvider.GetService<IOptions<MsalDistributedTokenCacheAdapterOptions>>(),
+                        _serviceProvider.GetService<ILogger<MsalDistributedTokenCacheAdapter>>());
 
                     await msalCache.InitializeAsync(app.UserTokenCache);
 
@@ -148,7 +150,7 @@ namespace BackgroundWorker
                         throw ex;
                     }
                 }
-            }   
+            }
 
             Console.ForegroundColor = ConsoleColor.Green;
             Console.Write(Environment.NewLine);

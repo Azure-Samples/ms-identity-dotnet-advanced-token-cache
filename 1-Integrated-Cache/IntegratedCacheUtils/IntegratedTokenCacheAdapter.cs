@@ -2,6 +2,7 @@
 using IntegratedCacheUtils.Stores;
 using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Web.TokenCacheProviders.Distributed;
@@ -14,13 +15,16 @@ namespace IntegratedCacheUtils
     public class IntegratedTokenCacheAdapter : MsalDistributedTokenCacheAdapter
     {
         private readonly IServiceScopeFactory _scopeFactory;
+        private readonly ILogger<MsalDistributedTokenCacheAdapter> _logger;
 
         public IntegratedTokenCacheAdapter(
             IServiceScopeFactory scopeFactory,
             IDistributedCache memoryCache,
-            IOptions<MsalDistributedTokenCacheAdapterOptions> cacheOptions) : base(memoryCache, cacheOptions)
+            IOptions<MsalDistributedTokenCacheAdapterOptions> cacheOptions,
+            ILogger<MsalDistributedTokenCacheAdapter> logger) : base(memoryCache, cacheOptions, logger)
         {
-            _scopeFactory = scopeFactory;
+            this._scopeFactory = scopeFactory;
+            this._logger = logger;
         }
 
         // Overriding OnBeforeWriteAsync to upsert the entity MsalAccountActivity
@@ -29,6 +33,8 @@ namespace IntegratedCacheUtils
         {
             var accountActivity = new MsalAccountActivity(args.SuggestedCacheKey, args.Account);
             await UpsertActivity(accountActivity);
+
+            _logger.LogInformation($"{args.SuggestedCacheKey}-{args.Account}");
 
             await Task.FromResult(base.OnBeforeWriteAsync(args));
         }

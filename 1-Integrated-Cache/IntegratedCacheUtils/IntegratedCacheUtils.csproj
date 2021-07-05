@@ -20,8 +20,8 @@
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
-    <PackageReference Include="Microsoft.Identity.Client" Version="4.17.0" />
-    <PackageReference Include="Microsoft.Identity.Web" Version="0.2.0-preview" />
+    <PackageReference Include="Microsoft.Identity.Client" Version="4.33.0" />
+    <PackageReference Include="Microsoft.Identity.Web" Version="1.14.0" />
     <PackageReference Include="StackExchange.Redis" Version="2.1.58" />
   </ItemGroup>
 

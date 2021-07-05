@@ -2,17 +2,18 @@
 page_type: sample
 languages:
   - csharp
+  - javascript
 products:
-  - microsoft-authentication-library
-  - microsoft-identity-platform
+  - microsoft-identity-web
   - azure-active-directory  
   - microsoft-graph-api
+name: Share the MSAL token cache between a web API and a background console worker app
 description: "An ASP.Net Core sample that shows how web APIs can share the token cache with their background services and continue to act on-behalf of users in their absence."
 ---
 
-![Build badge](https://identitydivision.visualstudio.com/_apis/public/build/definitions/a7934fdd-dcde-4492-a406-7fad6ac00e17/<BuildNumber>/badge)
-
 # Share the MSAL token cache between a web API and a background console worker app
+
+![Build badge](https://identitydivision.visualstudio.com/_apis/public/build/definitions/a7934fdd-dcde-4492-a406-7fad6ac00e17/<BuildNumber>/badge)
 
 ## Overview
 
@@ -34,13 +35,19 @@ Additionally, since the console app uses cached tokens with delegated permission
 
 ## How to run this sample
 
-Pre-requisites:
+### Prerequisites
+
+- Either [Visual Studio](https://visualstudio.microsoft.com/downloads/) or [Visual Studio Code](https://code.visualstudio.com/download) and [.NET Core SDK](https://www.microsoft.com/net/learn/get-started)
+- An **Azure AD** tenant. For more information, see: [How to get an Azure AD tenant](https://docs.microsoft.com/azure/active-directory/develop/quickstart-create-new-tenant)
+- A user account in your **Azure AD** tenant. This sample will not work with a **personal Microsoft account**.  If you're signed in to the [Azure portal](https://portal.azure.com) with a personal Microsoft account and have not created a user account in your directory before, you will need to create one before proceeding.
 
 - If you want to store the token cache on a **SQL Server database**, you can easily generate the token cache table by installing the following tool using the **Developer Command Prompt for Visual Studio** (running as an administrator):
 
     ```shell
     dotnet tool install --global dotnet-sql-cache
     ```
+
+### Setup
 
 ## Step 1: Clone the repository
 
@@ -50,11 +57,17 @@ From your shell or command line, navigate to the following folder in the reposit
 cd "1-Integrated-Cache\1-2-WebAPI-BgWorker"
 ```
 
+### Install project dependencies
+
+```console
+    dotnet restore
+```
+
 ## Step 2: App Registration
 
 There are two projects in this sample. Each needs to be separately registered in your Azure AD tenant. To register these projects, you can:
 
-- either follow the step [Choose the Azure AD tenant where you want to create your applications](#choose-the-azure-ad-tenant-where-you-want-to-create-your-applications) below
+- follow the steps below for manually register your apps
 - or use PowerShell scripts that:
   - **automatically** creates the Azure AD applications and related objects (passwords, permissions, dependencies) for you.
   - modify the projects' configuration files.
@@ -62,7 +75,10 @@ There are two projects in this sample. Each needs to be separately registered in
 <details>
   <summary>Expand this section if you want to use this automation:</summary>
 
-1. On Windows, run PowerShell and navigate to the root of the cloned directory
+> :warning: If you have never used **Azure AD Powershell** before, we recommend you go through the [App Creation Scripts](./AppCreationScripts/AppCreationScripts.md) once to ensure that your environment is prepared correctly for this step.
+
+1. On Windows, run PowerShell as **Administrator** and navigate to the root of the cloned directory
+1. If you have never used Azure AD Powershell before, we recommend you go through the [App Creation Scripts](./AppCreationScripts/AppCreationScripts.md) once to ensure that your environment is prepared correctly for this step.
 1. In PowerShell run:
 
    ```PowerShell
@@ -82,51 +98,53 @@ There are two projects in this sample. Each needs to be separately registered in
 
 </details>
 
-Follow the steps below to manually walk through the steps to register and configure the applications in the Azure portal.
-
 ### Choose the Azure AD tenant where you want to create your applications
 
 As a first step you'll need to:
 
 1. Sign in to the [Azure portal](https://portal.azure.com).
-1. If your account is present in more than one Azure AD tenant, select your profile at the top right corner in the menu on top of the page, and then **switch directory** to change your portal session to the desired Azure AD tenant..
+1. If your account is present in more than one Azure AD tenant, select your profile at the top right corner in the menu on top of the page, and then **switch directory** to change your portal session to the desired Azure AD tenant.
 
-### Step 2.1: Register the service app (WebApi-SharedTokenCache)
+### Register the service app (WebApi-SharedTokenCache)
 
-1. Navigate to the Microsoft identity platform for developers [App registrations](https://go.microsoft.com/fwlink/?linkid=2083908) page.
-1. Select **New registration**.
+1. Navigate to the [Azure portal](https://portal.azure.com) and select the **Azure AD** service.
+1. Select the **App Registrations** blade on the left, then select **New registration**.
 1. In the **Register an application page** that appears, enter your application's registration information:
    - In the **Name** section, enter a meaningful application name that will be displayed to users of the app, for example `WebApi-SharedTokenCache`.
    - Under **Supported account types**, select **Accounts in this organizational directory only**.
 1. Select **Register** to create the application.
 1. In the app's registration screen, find and note the **Application (client) ID**. You use this value in your app's configuration file(s) later in your code.
 1. Select **Save** to save your changes.
-1. In the app's registration screen, click on the **Certificates & secrets** blade in the left to open the page where we can generate secrets and upload certificates.
-1. In the **Client secrets** section, click on **New client secret**:
+1. In the app's registration screen, select the **Certificates & secrets** blade in the left to open the page where you can generate secrets and upload certificates.
+1. In the **Client secrets** section, select **New client secret**:
    - Type a key description (for instance `app secret`),
-   - Select one of the available key durations (**In 1 year**, **In 2 years**, or **Never Expires**) as per your security posture.
-   - The generated key value will be displayed when you click the **Add** button. Copy the generated value for use in the steps later.
+   - Select one of the available key durations (**6 months**, **12 months** or **Custom**) as per your security posture.
+   - The generated key value will be displayed when you select the **Add** button. Copy and save the generated value for use in later steps.
    - You'll need this key later in your code's configuration files. This key value will not be displayed again, and is not retrievable by any other means, so make sure to note it from the Azure portal before navigating to any other screen or blade.
-1. In the app's registration screen, click on the **API permissions** blade in the left to open the page where we add access to the APIs that your application needs.
-   - Click the **Add a permission** button and then,
+    > :bulb: For enhanced security, consider [using certificates](https://github.com/AzureAD/microsoft-identity-web/wiki/Certificates) instead of client secrets.
+1. In the app's registration screen, select the **API permissions** blade in the left to open the page where we add access to the APIs that your application needs.
+   - Select the **Add a permission** button and then,
    - Ensure that the **Microsoft APIs** tab is selected.
-   - In the *Commonly used Microsoft APIs* section, click on **Microsoft Graph**
+   - In the *Commonly used Microsoft APIs* section, select **Microsoft Graph**
    - In the **Delegated permissions** section, select the **User.Read** in the list. Use the search box if necessary.
-   - Click on the **Add permissions** button at the bottom.
-1. In the app's registration screen, select the **Expose an API** blade to the left to open the page where you can declare the parameters to expose this app as an Api for which client applications can obtain [access tokens](https://docs.microsoft.com/azure/active-directory/develop/access-tokens) for.
-The first thing that we need to do is to declare the unique [resource](https://docs.microsoft.com/azure/active-directory/develop/v2-oauth2-auth-code-flow) URI that the clients will be using to obtain access tokens for this Api. To declare an resource URI, follow the following steps:
-   - Click `Set` next to the **Application ID URI** to generate a URI that is unique for this app.
-   - For this sample, accept the proposed Application ID URI (api://{clientId}) by selecting **Save**.
-1. All Apis have to publish a minimum of one [scope](https://docs.microsoft.com/azure/active-directory/develop/v2-oauth2-auth-code-flow#request-an-authorization-code) for the client's to obtain an access token successfully. To publish a scope, follow the following steps:
+   - Select the **Add permissions** button at the bottom.
+1. In the app's registration screen, select the **Expose an API** blade to the left to open the page where you can declare the parameters to expose this app as an API for which client applications can obtain [access tokens](https://docs.microsoft.com/azure/active-directory/develop/access-tokens) for.
+The first thing that we need to do is to declare the unique [resource](https://docs.microsoft.com/azure/active-directory/develop/v2-oauth2-auth-code-flow) URI that the clients will be using to obtain access tokens for this API. To declare an resource URI, follow the following steps:
+   - Select `Set` next to the **Application ID URI** to generate a URI that is unique for this app.
+   - For this sample, accept the proposed Application ID URI (`api://{clientId}`) by selecting **Save**.
+1. All APIs have to publish a minimum of one [scope](https://docs.microsoft.com/azure/active-directory/develop/v2-oauth2-auth-code-flow#request-an-authorization-code) for the client's to obtain an access token successfully. To publish a scope, follow these steps:
    - Select **Add a scope** button open the **Add a scope** screen and Enter the values as indicated below:
         - For **Scope name**, use `access_as_user`.
-        - Select **Admins and users** options for **Who can consent?**
-        - For **Admin consent display name** type `Access WebApi-SharedTokenCache`
+        - Select **Admins and users** options for **Who can consent?**.
+        - For **Admin consent display name** type `Access WebApi-SharedTokenCache`.
         - For **Admin consent description** type `Allows the app to access WebApi-SharedTokenCache as the signed-in user.`
-        - For **User consent display name** type `Access WebApi-SharedTokenCache`
+        - For **User consent display name** type `Access WebApi-SharedTokenCache`.
         - For **User consent description** type `Allow the application to access WebApi-SharedTokenCache on your behalf.`
-        - Keep **State** as **Enabled**
-        - Click on the **Add scope** button on the bottom to save this scope.
+        - Keep **State** as **Enabled**.
+        - Select the **Add scope** button on the bottom to save this scope.
+1. Select the `Manifest` blade on the left.
+   - Set `accessTokenAcceptedVersion` property to **2**.
+   - Click on **Save**.
 
 #### Configure the service app (WebApi-SharedTokenCache) to use your app registration
 
@@ -134,36 +152,36 @@ Open the project in your IDE (like Visual Studio or Visual Studio Code) to confi
 
 > In the steps below, "ClientID" is the same as "Application ID" or "AppId".
 
-1. Open the `WebAPI\appsettings.json` file
-1. Find the app key `Domain` and replace the existing value with your Azure AD tenant name.
-1. Find the app key `TenantId` and replace the existing value with your Azure AD tenant ID.
-1. Find the app key `ClientId` and replace the existing value with the application ID (clientId) of the `WebApi-SharedTokenCache` application copied from the Azure portal.
-1. Find the app key `ClientSecret` and replace the existing value with the key you saved during the creation of the `WebApi-SharedTokenCache` app, in the Azure portal.
+1. Open the `WebAPI\appsettings.json` file.
+1. Find the key `Domain` and replace the existing value with your Azure AD tenant name.
+1. Find the key `TenantId` and replace the existing value with your Azure AD tenant ID.
+1. Find the key `ClientId` and replace the existing value with the application ID (clientId) of `WebApi-SharedTokenCache` app copied from the Azure portal.
+1. Find the key `ClientSecret` and replace the existing value with the key you saved during the creation of `WebApi-SharedTokenCache` copied from the Azure portal.
 
-### Step 2.2: Register the client app (ProfileSPA-SharedTokenCache)
+### Register the client app (ProfileSPA-SharedTokenCache)
 
-1. Navigate to the Microsoft identity platform for developers [App registrations](https://go.microsoft.com/fwlink/?linkid=2083908) page.
-1. Select **New registration**.
+1. Navigate to the [Azure portal](https://portal.azure.com) and select the **Azure AD** service.
+1. Select the **App Registrations** blade on the left, then select **New registration**.
 1. In the **Register an application page** that appears, enter your application's registration information:
    - In the **Name** section, enter a meaningful application name that will be displayed to users of the app, for example `ProfileSPA-SharedTokenCache`.
    - Under **Supported account types**, select **Accounts in this organizational directory only**.
-   - In the **Redirect URI (optional)** section, select **Single-Page Application** in the combo-box and enter the following redirect URI: `http://localhost:3000`.
+   - In the **Redirect URI (optional)** section, select **Single-page application** in the combo-box and enter the following redirect URI: `http://localhost:3000`.
 1. Select **Register** to create the application.
 1. In the app's registration screen, find and note the **Application (client) ID**. You use this value in your app's configuration file(s) later in your code.
 1. Select **Save** to save your changes.
-1. In the app's registration screen, click on the **API permissions** blade in the left to open the page where we add access to the APIs that your application needs.
-   - Click the **Add a permission** button and then:
+1. In the app's registration screen, select the **API permissions** blade in the left to open the page where we add access to the APIs that your application needs.
+   - Select the **Add a permission** button and then:
 
    - Ensure that the **Microsoft APIs** tab is selected.
-   - In the *Commonly used Microsoft APIs* section, click on **Microsoft Graph**
+   - In the *Commonly used Microsoft APIs* section, select **Microsoft Graph**
    - In the **Delegated permissions** section, select the **User.Read** in the list. Use the search box if necessary.
-   - Click on the **Add permissions** button at the bottom.
-   - Click the **Add a permission** button and then:
+   - Select the **Add permissions** button at the bottom.
+   - Select the **Add a permission** button and then:
 
    - Ensure that the **My APIs** tab is selected.
    - In the list of APIs, select the API `WebApi-SharedTokenCache`.
    - In the **Delegated permissions** section, select the **Access 'WebApi-SharedTokenCache'** in the list. Use the search box if necessary.
-   - Click on the **Add permissions** button at the bottom.
+   - Select the **Add permissions** button at the bottom.
 
 #### Configure the client app (ProfileSPA-SharedTokenCache) to use your app registration
 
@@ -179,13 +197,11 @@ Open the project in your IDE (like Visual Studio or Visual Studio Code) to confi
 
 #### Configure Known Client Applications for service (WebApi-SharedTokenCache)
 
-For a middle tier Web API (`WebApi-SharedTokenCache`) to be able to call a downstream Web API, the middle tier app needs to be granted the required permissions as well.
-However, since the middle tier cannot interact with the signed-in user, it needs to be explicitly bound to the client app in its Azure AD registration.
-This binding merges the permissions required by both the client and the middle tier Web Api and presents it to the end user in a single consent dialog. The user then consent to this combined set of permissions.
+For a middle-tier web API (`WebApi-SharedTokenCache`) to be able to call a downstream web API, the middle tier app needs to be granted the required permissions as well. However, since the middle-tier cannot interact with the signed-in user, it needs to be explicitly bound to the client app in its **Azure AD** registration. This binding merges the permissions required by both the client and the middle-tier web API and presents it to the end user in a single consent dialog. The user then consent to this combined set of permissions.
 
-To achieve this, you need to add the **Application Id** of the client app, in the Manifest of the Web API in the `knownClientApplications` property. Here's how:
+To achieve this, you need to add the **Application Id** of the client app to the `knownClientApplications` property in the **manifest** of the web API. Here's how:
 
-1. In the [Azure portal](https://portal.azure.com), navigate to your `WebApi-SharedTokenCache` app registration, and select **Manifest** section.
+1. In the [Azure portal](https://portal.azure.com), navigate to your `WebApi-SharedTokenCache` app registration, and select the **Manifest** blade.
 1. In the manifest editor, change the `"knownClientApplications": []` line so that the array contains 
    the Client ID of the client application (`ProfileSPA-SharedTokenCache`) as an element of the array.
 
@@ -290,10 +306,10 @@ In the Web Api project, we leverage [`Microsoft.Identity.Web`](https://github.co
 the `IntegratedTokenCacheAdapter.cs` as an extension for the `MsalDistributedTokenCacheAdapter`, so that before MSAL writes a token cache, we hydrate and save the `MsalAccountActivity.cs` entity. 
 
 ```c#
-services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-    .AddMicrosoftWebApi(Configuration)
-    .AddMicrosoftWebApiCallsWebApi(Configuration)
-    .AddIntegratedUserTokenCache();
+            services.AddMicrosoftIdentityWebApiAuthentication(Configuration)
+                .EnableTokenAcquisitionToCallDownstreamApi()
+                    .AddMicrosoftGraph(Configuration.GetSection("GraphAPI"))
+                .AddIntegratedUserTokenCache();
 
 To store the distributed token cache, you could use SQL Server or Redis for instance:
 

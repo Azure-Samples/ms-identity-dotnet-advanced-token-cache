@@ -33,7 +33,6 @@ namespace BackgroundWorker
                         options.SchemaName = "dbo";
                         options.TableName = "TokenCache";
                         options.DefaultSlidingExpiration = TimeSpan.FromHours(2);
-
                     })
                     .AddDbContext<IntegratedTokenCacheDbContext>(options => options.UseSqlServer(config.TokenCacheDbConnStr))
                     .AddSingleton<IMsalTokenCacheProvider, MsalDistributedTokenCacheAdapter>()
@@ -91,7 +90,7 @@ namespace BackgroundWorker
                 Console.WriteLine($"Trying to acquire token silently for {accountsToAcquireToken.Count()} activities...");
                 Console.Write(Environment.NewLine);
 
-                IConfidentialClientApplication app = await GetConfidentialClientApplication(config);
+                IConfidentialClientApplication app = GetConfidentialClientApplication(config);
 
                 // For each user's record, hydrate an IAccount with the values saved on the table, and call AcquireTokenSilent for this account.
                 foreach (var account in accountsToAcquireToken)
@@ -145,7 +144,7 @@ namespace BackgroundWorker
             Console.ResetColor();
         }
 
-        private static async Task<IConfidentialClientApplication> GetConfidentialClientApplication(AuthenticationConfig config)
+        private static IConfidentialClientApplication GetConfidentialClientApplication(AuthenticationConfig config)
         {
             var app = ConfidentialClientApplicationBuilder.Create(config.ClientId)
                 .WithClientSecret(config.ClientSecret)
@@ -154,7 +153,7 @@ namespace BackgroundWorker
 
             var msalCache = _serviceProvider.GetService<IMsalTokenCacheProvider>();
 
-            await msalCache.InitializeAsync(app.UserTokenCache);
+            msalCache.Initialize(app.UserTokenCache);
 
             return app;
         }

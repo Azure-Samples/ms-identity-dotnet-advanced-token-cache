@@ -41,12 +41,10 @@ namespace WebAPI
             // Adds Microsoft Identity platform (AAD v2.0) support to protect this Api
             // Configures the web api to call another web api (Ms Graph) using OBO
             // Sets the IMsalTokenCacheProvider to be the IntegratedTokenCacheAdapter
-            services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-                .AddMicrosoftWebApi(Configuration)
-                .AddMicrosoftWebApiCallsWebApi(Configuration)
+            services.AddMicrosoftIdentityWebApiAuthentication(Configuration)
+                .EnableTokenAcquisitionToCallDownstreamApi()
+                    .AddMicrosoftGraph(Configuration.GetSection("GraphAPI"))
                 .AddIntegratedUserTokenCache();
-
-            services.AddMicrosoftGraph(Configuration, new string[] { "user.read" });
 
             // Add Sql Server as distributed Token cache store
             // This config should match that of the BackgroundWorker
