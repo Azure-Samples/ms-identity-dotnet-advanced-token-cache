@@ -7,7 +7,7 @@ param(
     [string] $azureEnvironmentName
 )
 
-#Requires -Modules AzureAD
+#Requires -Modules AzureAD -RunAsAdministrator
 
 <#
  This script creates the Azure AD applications needed for this sample and updates the configuration files
@@ -35,9 +35,9 @@ Function ComputePassword
 
 # Create an application key
 # See https://www.sabin.io/blog/adding-an-azure-active-directory-application-and-key-using-powershell/
-Function CreateAppKey([DateTime] $fromDate, [double] $durationInYears, [string]$pw)
+Function CreateAppKey([DateTime] $fromDate, [double] $durationInMonths, [string]$pw)
 {
-    $endDate = $fromDate.AddYears($durationInYears) 
+    $endDate = $fromDate.AddMonths($durationInMonths);
     $keyId = (New-Guid).ToString();
     $key = New-Object Microsoft.Open.AzureAD.Model.PasswordCredential
     $key.StartDate = $fromDate
@@ -260,10 +260,10 @@ Function ConfigureApplications
 
    # Create the service AAD application
    Write-Host "Creating the AAD application (WebApi-SharedTokenCache)"
-   # Get a 2 years application key for the service Application
+   # Get a 6 months application key for the service Application
    $pw = ComputePassword
    $fromDate = [DateTime]::Now;
-   $key = CreateAppKey -fromDate $fromDate -durationInYears 2 -pw $pw
+   $key = CreateAppKey -fromDate $fromDate -durationInMonths 6 -pw $pw
    $serviceAppKey = $pw
    # create the application 
    $serviceAadApplication = New-AzureADApplication -DisplayName "WebApi-SharedTokenCache" `
@@ -289,28 +289,30 @@ Function ConfigureApplications
     # rename the user_impersonation scope if it exists to match the readme steps or add a new scope
     $scopes = New-Object System.Collections.Generic.List[Microsoft.Open.AzureAD.Model.OAuth2Permission]
    
+    # delete default scope i.e. User_impersonation
+    $scope = $serviceAadApplication.Oauth2Permissions | Where-Object { $_.Value -eq "User_impersonation" }
+    if($scope -ne $null)
+    {
+       # disable the scope
+       $scope.IsEnabled = $false
+       $scopes.Add($scope)
+       Set-AzureADApplication -ObjectId $serviceAadApplication.ObjectId -Oauth2Permissions $scopes
+
+       # clear the scope
+       $scopes.Clear()
+       Set-AzureADApplication -ObjectId $serviceAadApplication.ObjectId -Oauth2Permissions $scopes
+    }
+
     if ($scopes.Count -ge 0) 
     {
-        # add all existing scopes first
-        $serviceAadApplication.Oauth2Permissions | foreach-object { $scopes.Add($_) }
-
-        $scope = $serviceAadApplication.Oauth2Permissions | Where-Object { $_.Value -eq "User_impersonation" }
-
-        if ($scope -ne $null) 
-        {
-            $scope.Value = "access_as_user"
-        }
-        else 
-        {
-            # Add scope
-            $scope = CreateScope -value "access_as_user"  `
+             $scope = CreateScope -value access_as_user  `
                 -userConsentDisplayName "Access WebApi-SharedTokenCache"  `
                 -userConsentDescription "Allow the application to access WebApi-SharedTokenCache on your behalf."  `
                 -adminConsentDisplayName "Access WebApi-SharedTokenCache"  `
                 -adminConsentDescription "Allows the app to have the same access to information in the directory on behalf of the signed-in user."
             
-            $scopes.Add($scope)
-        }        
+                $scopes.Add($scope)
+    
     }
      
     # add/update scopes
@@ -342,7 +344,6 @@ Function ConfigureApplications
    $clientAadApplication = New-AzureADApplication -DisplayName "ProfileSPA-SharedTokenCache" `
                                                   -HomePage "http://localhost:3000" `
                                                   -ReplyUrls "http://localhost:3000" `
-                                                  -IdentifierUris "https://$tenantName/ProfileSPA-SharedTokenCache" `
                                                   -PublicClient $False
 
    # create the service principal of the newly created application 
@@ -421,7 +422,13 @@ Function ConfigureApplications
    Write-Host "  - In the 'ProfileSPA-SharedTokenCache' registration's authentication blade, change the  app type to 'Single Page App' as explained in the step 'Step 2.2: Register the client app (ProfileSPA-SharedTokenCache)' of the README.MD. The PowerShell registers it as a 'Web' app." -ForegroundColor Red 
 
    Write-Host -ForegroundColor Green "------------------------------------------------------------------------------------------------" 
-     
+      if($isOpenSSL -eq 'Y')
+   {
+        Write-Host -ForegroundColor Green "------------------------------------------------------------------------------------------------" 
+        Write-Host "You have generated certificate using OpenSSL so follow below steps: "
+        Write-Host "Install the certificate on your system from current folder."
+        Write-Host -ForegroundColor Green "------------------------------------------------------------------------------------------------" 
+   }
    Add-Content -Value "</tbody></table></body></html>" -Path createdApps.html  
 }
 

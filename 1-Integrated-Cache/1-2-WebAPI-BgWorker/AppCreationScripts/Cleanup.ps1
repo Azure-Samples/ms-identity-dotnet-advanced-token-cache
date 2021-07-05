@@ -7,11 +7,11 @@ param(
     [string] $azureEnvironmentName
 )
 
-#Requires -Modules AzureAD
+#Requires -Modules AzureAD -RunAsAdministrator
 
 
 if ($null -eq (Get-Module -ListAvailable -Name "AzureAD")) { 
-    Install-Module "AzureAD" -Scope CurrentUser 
+    Install-Module "AzureAD" -Scope CurrentUser                                            
 } 
 Import-Module AzureAD
 $ErrorActionPreference = "Stop"
@@ -60,7 +60,14 @@ Function Cleanup
     Write-Host "Cleaning-up applications from tenant '$tenantName'"
 
     Write-Host "Removing 'service' (WebApi-SharedTokenCache) if needed"
-    Get-AzureADApplication -Filter "DisplayName eq 'WebApi-SharedTokenCache'"  | ForEach-Object {Remove-AzureADApplication -ObjectId $_.ObjectId }
+    try
+    {
+        Get-AzureADApplication -Filter "DisplayName eq 'WebApi-SharedTokenCache'"  | ForEach-Object {Remove-AzureADApplication -ObjectId $_.ObjectId }
+    }
+    catch
+    {
+	    Write-Host "Unable to remove the 'WebApi-SharedTokenCache' . Try deleting manually." -ForegroundColor White -BackgroundColor Red
+    }
     $apps = Get-AzureADApplication -Filter "DisplayName eq 'WebApi-SharedTokenCache'"
     if ($apps)
     {
@@ -73,10 +80,23 @@ Function Cleanup
         Write-Host "Removed WebApi-SharedTokenCache.."
     }
     # also remove service principals of this app
-    Get-AzureADServicePrincipal -filter "DisplayName eq 'WebApi-SharedTokenCache'" | ForEach-Object {Remove-AzureADServicePrincipal -ObjectId $_.Id -Confirm:$false}
-    
+    try
+    {
+        Get-AzureADServicePrincipal -filter "DisplayName eq 'WebApi-SharedTokenCache'" | ForEach-Object {Remove-AzureADServicePrincipal -ObjectId $_.Id -Confirm:$false}
+    }
+    catch
+    {
+	    Write-Host "Unable to remove ServicePrincipal 'WebApi-SharedTokenCache' . Try deleting manually from Enterprise applications." -ForegroundColor White -BackgroundColor Red
+    }
     Write-Host "Removing 'client' (ProfileSPA-SharedTokenCache) if needed"
-    Get-AzureADApplication -Filter "DisplayName eq 'ProfileSPA-SharedTokenCache'"  | ForEach-Object {Remove-AzureADApplication -ObjectId $_.ObjectId }
+    try
+    {
+        Get-AzureADApplication -Filter "DisplayName eq 'ProfileSPA-SharedTokenCache'"  | ForEach-Object {Remove-AzureADApplication -ObjectId $_.ObjectId }
+    }
+    catch
+    {
+	    Write-Host "Unable to remove the 'ProfileSPA-SharedTokenCache' . Try deleting manually." -ForegroundColor White -BackgroundColor Red
+    }
     $apps = Get-AzureADApplication -Filter "DisplayName eq 'ProfileSPA-SharedTokenCache'"
     if ($apps)
     {
@@ -89,8 +109,15 @@ Function Cleanup
         Write-Host "Removed ProfileSPA-SharedTokenCache.."
     }
     # also remove service principals of this app
-    Get-AzureADServicePrincipal -filter "DisplayName eq 'ProfileSPA-SharedTokenCache'" | ForEach-Object {Remove-AzureADServicePrincipal -ObjectId $_.Id -Confirm:$false}
-    
+    try
+    {
+        Get-AzureADServicePrincipal -filter "DisplayName eq 'ProfileSPA-SharedTokenCache'" | ForEach-Object {Remove-AzureADServicePrincipal -ObjectId $_.Id -Confirm:$false}
+    }
+    catch
+    {
+	    Write-Host "Unable to remove ServicePrincipal 'ProfileSPA-SharedTokenCache' . Try deleting manually from Enterprise applications." -ForegroundColor White -BackgroundColor Red
+    }
 }
 
 Cleanup -Credential $Credential -tenantId $TenantId
+

@@ -1,4 +1,5 @@
 ﻿using Microsoft.Extensions.Caching.Distributed;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Microsoft.Identity.Web.TokenCacheProviders.Distributed;
 using System;
@@ -17,6 +18,7 @@ namespace BackgroundWorker
         /// .NET Core Memory cache.
         /// </summary>
         private readonly IDistributedCache _distributedCache;
+        private readonly ILogger<MsalDistributedTokenCacheAdapter> _logger;
 
         /// <summary>
         /// MSAL memory token cache options.
@@ -27,26 +29,31 @@ namespace BackgroundWorker
 
         public BackgroundWorkerTokenCacheAdapter(string cacheKey, 
             IDistributedCache distributedCache, 
-            IOptions<MsalDistributedTokenCacheAdapterOptions> cacheOptions) 
-            : base(distributedCache, cacheOptions)
+            IOptions<MsalDistributedTokenCacheAdapterOptions> cacheOptions,
+            ILogger<MsalDistributedTokenCacheAdapter> logger) 
+            : base(distributedCache, cacheOptions, logger)
         {
             _cacheKey = cacheKey;
             _distributedCache = distributedCache;
             _cacheOptions = cacheOptions?.Value;
+            _logger = logger;
         }
 
         protected override async Task RemoveKeyAsync(string cacheKey)
         {
+            _logger.LogInformation($"RemoveKeyAsync::cacheKey-'{cacheKey}'");
             await _distributedCache.RemoveAsync(_cacheKey).ConfigureAwait(false);
         }
 
         protected override async Task<byte[]> ReadCacheBytesAsync(string cacheKey)
         {
+            _logger.LogInformation($"ReadCacheBytesAsync::cacheKey-'{cacheKey}'");
             return await _distributedCache.GetAsync(_cacheKey).ConfigureAwait(false);
         }
 
         protected override async Task WriteCacheBytesAsync(string cacheKey, byte[] bytes)
         {
+            _logger.LogInformation($"WriteCacheBytesAsync::cacheKey-'{cacheKey}'");
             await _distributedCache.SetAsync(_cacheKey, bytes, _cacheOptions).ConfigureAwait(false);
         }
     }
