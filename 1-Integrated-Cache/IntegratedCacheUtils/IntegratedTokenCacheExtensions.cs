@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Authentication;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Identity.Web;
 using Microsoft.Identity.Web.TokenCacheProviders;
 using System;
 
@@ -27,8 +28,8 @@ namespace IntegratedCacheUtils
         /// <summary>Adds an integrated per-user .NET Core distributed based token cache.</summary>
         /// <param name="builder">The Authentication builder to add to.</param>
         /// <returns>A <see cref="AuthenticationBuilder"/> to chain.</returns>
-        public static AuthenticationBuilder AddIntegratedUserTokenCache(
-            this AuthenticationBuilder builder)
+        public static MicrosoftIdentityAppCallsWebApiAuthenticationBuilder AddIntegratedUserTokenCache(
+            this MicrosoftIdentityAppCallsWebApiAuthenticationBuilder builder)
         {
             if (builder == null)
             {

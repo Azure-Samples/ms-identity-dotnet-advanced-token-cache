@@ -3,10 +3,11 @@ page_type: sample
 languages:
   - csharp
 products:
-  - microsoft-authentication-library
-  - microsoft-identity-platform
+  - microsoft-identity-web
   - azure-active-directory  
   - microsoft-graph-api
+name: Sharing the MSAL token cache between a web app and a background console worker app
+urlFragment: ms-identity-dotnet-advanced-token-cache
 description: "This sample demonstrates how to share the MSAL token cache between a web app and a background console worker app and continue to act on-behalf of users in their absence"
 
 ---
@@ -34,7 +35,7 @@ Additionally, since the console app uses cached tokens with delegated permission
 
 ## How to run this sample
 
-Pre-requisites:
+
 
 - If you want to store the token cache on a **SQL Server database**, you can easily generate the token cache table by installing the following tool using the **Developer Command Prompt for Visual Studio** (running as administrator):
 
@@ -54,7 +55,7 @@ cd "1-Integrated-Cache\1-1-WebApp-BgWorker"
 
 There is two projects in this sample, although you will only use one app registration. To register it, you can:
 
-- either follow the step [Choose the Azure AD tenant where you want to create your applications](#choose-the-azure-ad-tenant-where-you-want-to-create-your-applications) below
+- follow the steps below for manually register your apps
 - or use PowerShell scripts that:
   - **automatically** creates the Azure AD applications and related objects (passwords, permissions, dependencies) for you.
   - modify the projects' configuration files.
@@ -62,7 +63,10 @@ There is two projects in this sample, although you will only use one app registr
 <details>
   <summary>Expand this section if you want to use this automation:</summary>
 
-1. On Windows, run PowerShell and navigate to the root of the cloned directory
+> :warning: If you have never used **Azure AD Powershell** before, we recommend you go through the [App Creation Scripts](./AppCreationScripts/AppCreationScripts.md) once to ensure that your environment is prepared correctly for this step.
+
+1. On Windows, run PowerShell as **Administrator** and navigate to the root of the cloned directory
+1. If you have never used Azure AD Powershell before, we recommend you go through the [App Creation Scripts](./AppCreationScripts/AppCreationScripts.md) once to ensure that your environment is prepared correctly for this step.
 1. In PowerShell run:
 
    ```PowerShell
@@ -89,34 +93,35 @@ Follow the steps below to manually walk through the steps to register and config
 As a first step you'll need to:
 
 1. Sign in to the [Azure portal](https://portal.azure.com).
-1. If your account is present in more than one Azure AD tenant, select your profile at the top right corner in the menu on top of the page, and then **switch directory** to change your portal session to the desired Azure AD tenant..
+1. If your account is present in more than one Azure AD tenant, select your profile at the top right corner in the menu on top of the page, and then **switch directory** to change your portal session to the desired Azure AD tenant.
 
 #### Register the webApp app (WebApp-SharedTokenCache)
 
-1. Navigate to the Microsoft identity platform for developers [App registrations](https://go.microsoft.com/fwlink/?linkid=2083908) page.
-1. Select **New registration**.
+1. Navigate to the [Azure portal](https://portal.azure.com) and select the **Azure AD** service.
+1. Select the **App Registrations** blade on the left, then select **New registration**.
 1. In the **Register an application page** that appears, enter your application's registration information:
    - In the **Name** section, enter a meaningful application name that will be displayed to users of the app, for example `WebApp-SharedTokenCache`.
-   - Under **Supported account types**, select **Accounts in any organizational directory and personal Microsoft accounts (e.g. Skype, Xbox, Outlook.com)**.
+   - Under **Supported account types**, select **Accounts in this organizational directory only**.
    - In the **Redirect URI (optional)** section, select **Web** in the combo-box and enter the following redirect URI: `https://localhost:44321/signin-oidc`.
 1. Select **Register** to create the application.
 1. In the app's registration screen, find and note the **Application (client) ID**. You use this value in your app's configuration file(s) later in your code.
 1. In the app's registration screen, select **Authentication** in the menu.
    - If you don't have a platform added, select **Add a platform** and select the **Web** option.
-   - In the **Logout URL** section, set it to `https://localhost:44321/signout-oidc`.
+   - In the **Front-channel logout URL** section, set it to `https://localhost:44321/signout-oidc`.
 1. Select **Save** to save your changes.
-1. In the app's registration screen, click on the **Certificates & secrets** blade in the left to open the page where we can generate secrets and upload certificates.
-1. In the **Client secrets** section, click on **New client secret**:
+1. In the app's registration screen, select the **Certificates & secrets** blade in the left to open the page where you can generate secrets and upload certificates.
+1. In the **Client secrets** section, select **New client secret**:
    - Type a key description (for instance `app secret`),
-   - Select one of the available key durations (**In 1 year**, **In 2 years**, or **Never Expires**) as per your security posture.
-   - The generated key value will be displayed when you click the **Add** button. Copy the generated value for use in the steps later.
+   - Select one of the available key durations (**6 months**, **12 months** or **Custom**) as per your security posture.
+   - The generated key value will be displayed when you select the **Add** button. Copy and save the generated value for use in later steps.
    - You'll need this key later in your code's configuration files. This key value will not be displayed again, and is not retrievable by any other means, so make sure to note it from the Azure portal before navigating to any other screen or blade.
-1. In the app's registration screen, click on the **API permissions** blade in the left to open the page where we add access to the APIs that your application needs.
-   - Click the **Add a permission** button and then,
+    > :bulb: For enhanced security, consider [using certificates](https://github.com/AzureAD/microsoft-identity-web/wiki/Certificates) instead of client secrets.
+1. In the app's registration screen, select the **API permissions** blade in the left to open the page where we add access to the APIs that your application needs.
+   - Select the **Add a permission** button and then,
    - Ensure that the **Microsoft APIs** tab is selected.
-   - In the *Commonly used Microsoft APIs* section, click on **Microsoft Graph**
+   - In the *Commonly used Microsoft APIs* section, select **Microsoft Graph**
    - In the **Delegated permissions** section, select the **User.Read** in the list. Use the search box if necessary.
-   - Click on the **Add permissions** button at the bottom.
+   - Select the **Add permissions** button at the bottom.
 
 #### Configure the webApp app (WebApp-SharedTokenCache) to use your app registration
 
@@ -136,7 +141,7 @@ Open the project in your IDE (like Visual Studio or Visual Studio Code) to confi
 - In case you want to deploy your app in Sovereign or national clouds, ensure the `GraphApiUrl` option matches the one you want. By default this is Microsoft Graph in the Azure public cloud
 
   ```Json
-   "GraphApiUrl": "https://graph.microsoft.com/v1.0"
+   "BaseUrl": "https://graph.microsoft.com/v1.0"
   ```
 
 ### Step 3: Register the Background Worker project with your Azure AD tenant
@@ -207,10 +212,11 @@ In the Web App project, we leverage [`Microsoft.Identity.Web`](https://github.co
 the `IntegratedTokenCacheAdapter.cs` as an extension for the `MsalDistributedTokenCacheAdapter`, so that before MSAL writes a token cache, we hydrate and save the `MsalAccountActivity.cs` entity.
 
 ```c#
-services.AddAuthentication(OpenIdConnectDefaults.AuthenticationScheme)
-    .AddMicrosoftWebApp(Configuration)
-    .AddMicrosoftWebAppCallsWebApi(Configuration, new string[] { Constants.ScopeUserRead })
-    .AddIntegratedUserTokenCache();
+            services.AddAuthentication(OpenIdConnectDefaults.AuthenticationScheme)
+                .AddMicrosoftIdentityWebApp(Configuration, "AzureAd", subscribeToOpenIdConnectMiddlewareDiagnosticsEvents: true)
+                    .EnableTokenAcquisitionToCallDownstreamApi()
+                        .AddMicrosoftGraph(Configuration.GetSection("GraphAPI"))
+                    .AddIntegratedUserTokenCache();
 ```
 
 To store the distributed token cache, you could use SQL Server or Redis for instance:

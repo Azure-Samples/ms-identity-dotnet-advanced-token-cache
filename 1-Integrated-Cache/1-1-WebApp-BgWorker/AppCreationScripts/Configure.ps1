@@ -7,7 +7,7 @@ param(
     [string] $azureEnvironmentName
 )
 
-#Requires -Modules AzureAD
+#Requires -Modules AzureAD -RunAsAdministrator
 
 <#
  This script creates the Azure AD applications needed for this sample and updates the configuration files
@@ -35,9 +35,9 @@ Function ComputePassword
 
 # Create an application key
 # See https://www.sabin.io/blog/adding-an-azure-active-directory-application-and-key-using-powershell/
-Function CreateAppKey([DateTime] $fromDate, [double] $durationInYears, [string]$pw)
+Function CreateAppKey([DateTime] $fromDate, [double] $durationInMonths, [string]$pw)
 {
-    $endDate = $fromDate.AddYears($durationInYears) 
+    $endDate = $fromDate.AddMonths($durationInMonths);
     $keyId = (New-Guid).ToString();
     $key = New-Object Microsoft.Open.AzureAD.Model.PasswordCredential
     $key.StartDate = $fromDate
@@ -193,18 +193,16 @@ Function ConfigureApplications
 
    # Create the webApp AAD application
    Write-Host "Creating the AAD application (WebApp-SharedTokenCache)"
-   # Get a 2 years application key for the webApp Application
+   # Get a 6 months application key for the webApp Application
    $pw = ComputePassword
    $fromDate = [DateTime]::Now;
-   $key = CreateAppKey -fromDate $fromDate -durationInYears 2 -pw $pw
+   $key = CreateAppKey -fromDate $fromDate -durationInMonths 6 -pw $pw
    $webAppAppKey = $pw
    # create the application 
    $webAppAadApplication = New-AzureADApplication -DisplayName "WebApp-SharedTokenCache" `
                                                   -HomePage "https://localhost:44321/" `
                                                   -LogoutUrl "https://localhost:44321/signout-oidc" `
                                                   -ReplyUrls "https://localhost:44321/signin-oidc" `
-                                                  -IdentifierUris "https://$tenantName/WebApp-SharedTokenCache" `
-                                                  -AvailableToOtherTenants $True `
                                                   -PasswordCredentials $key `
                                                   -PublicClient $False
 
@@ -260,7 +258,13 @@ Function ConfigureApplications
    Write-Host "  - Please follow the steps in the readme , 'Register the Background Worker project with your Azure AD tenant' to add support in the app registration for the console app " -ForegroundColor Red 
 
    Write-Host -ForegroundColor Green "------------------------------------------------------------------------------------------------" 
-     
+      if($isOpenSSL -eq 'Y')
+   {
+        Write-Host -ForegroundColor Green "------------------------------------------------------------------------------------------------" 
+        Write-Host "You have generated certificate using OpenSSL so follow below steps: "
+        Write-Host "Install the certificate on your system from current folder."
+        Write-Host -ForegroundColor Green "------------------------------------------------------------------------------------------------" 
+   }
    Add-Content -Value "</tbody></table></body></html>" -Path createdApps.html  
 }
 

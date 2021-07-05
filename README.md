@@ -17,7 +17,6 @@ urlFragment: "ms-identity-dotnet-advanced-token-cache"
 
 # Accessing the logged-in user's token cache from background apps, APIs and services
 
-
 These ASP.Net Core samples show how background apps, APIs and services can access  the [MSAL's access token cache](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/wiki/token-cache-serialization) and continue to act on-behalf of users in their absence.
 
 The [MSAL.NET](http://aka.ms/msal-net) and the [Microsoft.Identity.Web](https://aka.ms/microsoft-identity-web) libraries provide various mechanisms for apps that authenticate users with the [Microsoft Identity Platform](http://aka.ms/identityplatform) to cache [Access Tokens](https://aka.ms/access-tokens) for various resources like [Microsoft Graph](https://graph.microsoft.com) to a [distributed token cache implementations like Sql Server or Redis](https://github.com/AzureAD/microsoft-identity-web/wiki/token-cache-serialization).
@@ -34,17 +33,25 @@ Today, most background processes that need to work with user's data without them
 | `CONTRIBUTING.md`           | Guidelines for contributing to the sample. |
 | `LICENSE`                   | The license for the sample.                |
 
+## Prerequisites
+
+- Either [Visual Studio](https://visualstudio.microsoft.com/downloads/) or [Visual Studio Code](https://code.visualstudio.com/download) and [.NET Core SDK](https://www.microsoft.com/net/learn/get-started)
+- An **Azure AD** tenant. For more information, see: [How to get an Azure AD tenant](https://docs.microsoft.com/azure/active-directory/develop/quickstart-create-new-tenant)
+- A user account in your **Azure AD** tenant. This sample will not work with a **personal Microsoft account**.  If you're signed in to the [Azure portal](https://portal.azure.com) with a personal Microsoft account and have not created a user account in your directory before, you will need to create one before proceeding.
+
 ## Setup
 
 ### Step 1
 
-Using a command line interface such as VS Code integrated terminal, clone or download this repository:
+From your shell or command line:
 
 ```console
-git clone https://github.com/Azure-Samples/ms-identity-dotnet-advanced-token-cache.git
+    git clone https://github.com/Azure-Samples/ms-identity-dotnet-advanced-token-cache.git
 ```
 
-> :warning: Given that the name of the sample is quite long, and so are the names of the referenced NuGet packages, you might want to clone it in a folder close to the root of your hard drive, to avoid file size limitations on Windows.
+or download and extract the repository .zip file.
+
+> :warning: To avoid path length limitations on Windows, we recommend cloning into a directory near the root of your drive.
 
 ### Step 2
 

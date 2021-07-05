@@ -50,9 +50,10 @@ namespace WebApp
             // Configures the web app to call a web api (Ms Graph)
             // Sets the IMsalTokenCacheProvider to be the IntegratedTokenCacheAdapter
             services.AddAuthentication(OpenIdConnectDefaults.AuthenticationScheme)
-                .AddMicrosoftWebApp(Configuration)
-                .AddMicrosoftWebAppCallsWebApi(Configuration, new string[] { Constants.ScopeUserRead })
-                .AddIntegratedUserTokenCache();
+                .AddMicrosoftIdentityWebApp(Configuration, "AzureAd", subscribeToOpenIdConnectMiddlewareDiagnosticsEvents: true)
+                    .EnableTokenAcquisitionToCallDownstreamApi()
+                        .AddMicrosoftGraph(Configuration.GetSection("GraphAPI"))
+                    .AddIntegratedUserTokenCache();
 
             // Add Sql Server as distributed Token cache store
             // This config should match that of the BackgroundWorker
