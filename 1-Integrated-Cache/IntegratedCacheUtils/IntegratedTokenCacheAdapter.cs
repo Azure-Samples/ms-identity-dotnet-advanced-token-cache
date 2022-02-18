@@ -35,8 +35,6 @@ namespace IntegratedCacheUtils
             await UpsertActivity(accountActivity);
 
             _logger.LogInformation($"{args.SuggestedCacheKey}-{args.Account}");
-
-            await Task.FromResult(base.OnBeforeWriteAsync(args));
         }
 
         // Call the upsert method of the class that implements IMsalAccountActivityStore
