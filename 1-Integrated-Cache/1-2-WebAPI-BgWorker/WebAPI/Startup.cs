@@ -3,7 +3,6 @@
 
 using IntegratedCacheUtils;
 using IntegratedCacheUtils.Stores;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.EntityFrameworkCore;
@@ -11,7 +10,6 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Identity.Web;
-using Microsoft.Identity.Web.TokenCacheProviders;
 using System;
 using System.Diagnostics;
 using WebAPI.Services;
@@ -43,12 +41,13 @@ namespace WebAPI
             // Sets the IMsalTokenCacheProvider to be the IntegratedTokenCacheAdapter
             services.AddMicrosoftIdentityWebApiAuthentication(Configuration)
                 .EnableTokenAcquisitionToCallDownstreamApi()
-                    .AddMicrosoftGraph(Configuration.GetSection("GraphAPI"))
                 .AddIntegratedUserTokenCache();
+
+            // Add a custom GraphServiceClient which leverages OBO keys for persistance.
+            services.AddCustomMicrosoftGraphClient(Configuration);
 
             // Add Sql Server as distributed Token cache store
             // This config should match that of the BackgroundWorker
-
             services.AddDistributedSqlServerCache(options =>
             {
                 /*

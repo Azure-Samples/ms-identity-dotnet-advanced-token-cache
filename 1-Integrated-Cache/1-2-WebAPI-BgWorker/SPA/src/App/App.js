@@ -70,12 +70,12 @@ class App extends React.Component {
                             {
                                 this.state.profile ?
                                     <ListGroup variant="flush">
-                                        <ListGroup.Item>Employee Id: {this.state.profile.employeeId}</ListGroup.Item>
-                                        <ListGroup.Item>Department: {this.state.profile.department}</ListGroup.Item>
-                                        <ListGroup.Item>Display Name: {this.state.profile.displayName}</ListGroup.Item>
-                                        <ListGroup.Item>Given Name: {this.state.profile.givenName}</ListGroup.Item>
-                                        <ListGroup.Item>Country: {this.state.profile.country}</ListGroup.Item>
-                                        <ListGroup.Item>City: {this.state.profile.city}</ListGroup.Item>
+                                        <ListGroup.Item>Employee Id: {this.state.profile.EmployeeId}</ListGroup.Item>
+                                        <ListGroup.Item>Department: {this.state.profile.Department}</ListGroup.Item>
+                                        <ListGroup.Item>Display Name: {this.state.profile.DisplayName}</ListGroup.Item>
+                                        <ListGroup.Item>Given Name: {this.state.profile.GivenName}</ListGroup.Item>
+                                        <ListGroup.Item>Country: {this.state.profile.Country}</ListGroup.Item>
+                                        <ListGroup.Item>City: {this.state.profile.City}</ListGroup.Item>
                                     </ListGroup>      
                                 : null
                             }

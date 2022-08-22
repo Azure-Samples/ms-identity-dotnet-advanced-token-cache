@@ -1,18 +1,12 @@
 ﻿using IntegratedCacheUtils;
 using IntegratedCacheUtils.Stores;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Options;
 using Microsoft.Identity.Client;
-using Microsoft.Identity.Web.TokenCacheProviders;
-using Microsoft.Identity.Web.TokenCacheProviders.Distributed;
 using System;
 using System.Linq;
-using System.Threading;
 using System.Threading.Tasks;
-using Microsoft.Extensions.Logging;
+using Microsoft.Identity.Web;
 
 namespace BackgroundWorker
 {
@@ -41,7 +35,6 @@ namespace BackgroundWorker
 
                     })
                     .AddDbContext<IntegratedTokenCacheDbContext>(options => options.UseSqlServer(config.TokenCacheDbConnStr))
-                    //.AddSingleton<IMsalTokenCacheProvider, BackgroundWorkerTokenCacheAdapter>()
                     .AddScoped<IMsalAccountActivityStore, SqlServerMsalAccountActivityStore>()
                     .BuildServiceProvider();
 
@@ -102,26 +95,13 @@ namespace BackgroundWorker
                 // For each user's record, hydrate an IAccount with the values saved on the table, and call AcquireTokenSilent for this account.
                 foreach (var account in accountsToAcquireToken)
                 {
-                    var msalCache = new BackgroundWorkerTokenCacheAdapter(account.AccountCacheKey,
-                        _serviceProvider.GetService<IDistributedCache>(),
-                        _serviceProvider.GetService<IOptions<MsalDistributedTokenCacheAdapterOptions>>(),
-                        _serviceProvider.GetService<ILogger<MsalDistributedTokenCacheAdapter>>());
-
-                    await msalCache.InitializeAsync(app.UserTokenCache);
-
-                    var hydratedAccount = new MsalAccount
-                    {
-                        HomeAccountId = new AccountId(
-                            account.AccountIdentifier,
-                            account.AccountObjectId,
-                            account.AccountTenantId)
-                    };
-
                     try
                     {
-                        var result = await app.AcquireTokenSilent(scopes, hydratedAccount)
-                            .ExecuteAsync()
-                            .ConfigureAwait(false);
+                        var result = await ((ILongRunningWebApi)app)
+                                        .AcquireTokenInLongRunningProcess(
+                                              scopes,
+                                              account.AccountCacheKey)
+                                         .ExecuteAsync();
 
                         Console.WriteLine($"Token acquired for account: {account.UserPrincipalName}");
                         Console.WriteLine($"Access token preview: {result.AccessToken.Substring(0, 70)} ...");
@@ -165,7 +145,17 @@ namespace BackgroundWorker
                 .WithAuthority(new Uri(config.Authority))
                 .Build();
 
-            return app;
+            return app.AddDistributedTokenCache(services => {
+                services.AddDistributedMemoryCache()
+                    .AddDistributedSqlServerCache(options =>
+                    {
+                        options.ConnectionString = config.TokenCacheDbConnStr;
+                        options.SchemaName = "dbo";
+                        options.TableName = "TokenCache";
+                        options.DefaultSlidingExpiration = TimeSpan.FromHours(2);
+
+                    });
+            }); ;
         }
     }
 }
