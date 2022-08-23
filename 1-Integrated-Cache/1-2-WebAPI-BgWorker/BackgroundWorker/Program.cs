@@ -9,7 +9,6 @@ using System.Threading.Tasks;
 using Microsoft.Identity.Web;
 using Microsoft.Identity.Web.TokenCacheProviders;
 using Microsoft.Identity.Web.TokenCacheProviders.Distributed;
-using Microsoft.Identity.Client;
 
 namespace BackgroundWorker
 {

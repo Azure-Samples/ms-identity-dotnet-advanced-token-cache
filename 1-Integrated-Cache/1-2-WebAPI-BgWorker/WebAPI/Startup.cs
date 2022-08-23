@@ -43,7 +43,7 @@ namespace WebAPI
                 .EnableTokenAcquisitionToCallDownstreamApi()
                 .AddIntegratedUserTokenCache();
 
-            // Add a custom GraphServiceClient which leverages OBO keys for persistance.
+            // Add a custom GraphServiceClient which leverages OBO keys for persistence.
             services.AddCustomMicrosoftGraphClient(Configuration);
 
             // Add Sql Server as distributed Token cache store

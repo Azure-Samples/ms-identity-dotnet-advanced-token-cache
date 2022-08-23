@@ -1,15 +1,18 @@
 ---
 page_type: sample
+name: Sharing the MSAL token cache between a web app and a background console worker app
+services: ms-identity
+platform: DotNet
 languages:
   - csharp
 products:
-  - microsoft-identity-web
-  - azure-active-directory  
-  - microsoft-graph-api
+ - aspnet-core
+ - azure-active-directory
+ - microsoft-identity-web
+ - microsoft-graph-api
 name: Sharing the MSAL token cache between a web app and a background console worker app
 urlFragment: ms-identity-dotnet-advanced-token-cache
-description: "This sample demonstrates how to share the MSAL token cache between a web app and a background console worker app and continue to act on-behalf of users in their absence"
-
+description: This sample demonstrates how to share the MSAL token cache between a web app and a background console worker app and continue to act on-behalf of users in their absence.
 ---
 
 ![Build badge](https://identitydivision.visualstudio.com/_apis/public/build/definitions/a7934fdd-dcde-4492-a406-7fad6ac00e17/<BuildNumber>/badge)
@@ -60,26 +63,24 @@ There is two projects in this sample, although you will only use one app registr
 <details>
   <summary>Expand this section if you want to use this automation:</summary>
 
-> :warning: If you have never used **Azure AD Powershell** before, we recommend you go through the [App Creation Scripts](./AppCreationScripts/AppCreationScripts.md) once to ensure that your environment is prepared correctly for this step.
-
-1. On Windows, run PowerShell as **Administrator** and navigate to the root of the cloned directory
-1. If you have never used Azure AD Powershell before, we recommend you go through the [App Creation Scripts](./AppCreationScripts/AppCreationScripts.md) once to ensure that your environment is prepared correctly for this step.
-1. In PowerShell run:
+    > :warning: If you have never used **Microsoft Graph PowerShell** before, we recommend you go through the [App Creation Scripts Guide](./AppCreationScripts/AppCreationScripts.md) once to ensure that your environment is prepared correctly for this step.
+  
+    1. On Windows, run PowerShell as **Administrator** and navigate to the root of the cloned directory
+    1. In PowerShell run:
 
    ```PowerShell
    Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope Process -Force
    ```
 
-1. Run the script to create your Azure AD application and configure the code of the sample application accordingly.
-1. In PowerShell run:
+    1. Run the script to create your Azure AD application and configure the code of the sample application accordingly.
+    1. For interactive process -in PowerShell, run:
 
    ```PowerShell
    cd .\AppCreationScripts\
-   .\Configure.ps1
+       .\Configure.ps1 -TenantId "[Optional] - your tenant id" -AzureEnvironmentName "[Optional] - Azure environment, defaults to 'Global'"
    ```
 
-   > Other ways of running the scripts are described in [App Creation Scripts](./AppCreationScripts/AppCreationScripts.md)
-   > The scripts also provide a guide to automated application registration, configuration and removal which can help in your CI/CD scenarios.
+    > Other ways of running the scripts are described in [App Creation Scripts guide](./AppCreationScripts/AppCreationScripts.md). The scripts also provide a guide to automated application registration, configuration and removal which can help in your CI/CD scenarios.
 
 </details>
 
@@ -127,10 +128,10 @@ Open the project in your IDE (like Visual Studio or Visual Studio Code) to confi
 >In the steps below, "ClientID" is the same as "Application ID" or "AppId".
 
 1. Open the `appsettings.json` file for the `WebApp`.
-2. Find the app key `ClientId` and replace the existing value with the application ID (clientId) of the `IntegratedWebApp-AdvancedToken` copied from the Azure portal.
+2. Find the app key `ClientId` and replace the existing value with the application ID (clientId) of the `WebApp-SharedTokenCache` copied from the Azure portal.
 3. Find the app key `TenantId` and replace the value with the Tenant ID where you registered your application.
 4. Find the app key `Domain` and replace the existing value with your Azure AD tenant name.
-5. Find the app key `ClientSecret` and replace the existing value with the key you saved during the creation of the `IntegratedWebApp-AdvancedToken`, in the Azure portal.
+5. Find the app key `ClientSecret` and replace the existing value with the key you saved during the creation of the `WebApp-SharedTokenCache`, in the Azure portal.
 6. Find the section `ConnectionStrings` and replace the value of the keys that are relevant to your scenario:
    - If you will use **SQL Server**, update the key `TokenCacheDbConnStr` with the database connection string.
    - If you will use **Redis**, update the key `TokenCacheRedisConnStr` with the Redis connection string, and the key `TokenCacheRedisInstaceName` with the the Redis instance name.
@@ -143,7 +144,7 @@ Open the project in your IDE (like Visual Studio or Visual Studio Code) to confi
 
 ### Step 3: Register the Background Worker project with your Azure AD tenant
 
-In order to have the Web App and the Background Worker sharing the same token cache, **they must share the same application ID (clientId)** for Azure AD as well. So for this step, you will set additional configuration to the existing `IntegratedWebApp-AdvancedToken` app registration.
+In order to have the Web App and the Background Worker sharing the same token cache, **they must share the same application ID (clientId)** for Azure AD as well. So for this step, you will set additional configuration to the existing `WebApp-SharedTokenCache` app registration.
 
 1. Navigate to your `WebApp-SharedTokenCache` [App registration](https://go.microsoft.com/fwlink/?linkid=2083908) page.
 2. In the app's registration screen, click on the **Authentication** blade in the left.
@@ -158,10 +159,10 @@ Open the project in your IDE (like Visual Studio) to configure the code.
 >In the steps below, "ClientID" is the same as "Application ID" or "AppId".
 
 1. Open the `appsettings.json` file for the `BackgroundWorker`.
-2. Find the app key `ClientId` and replace the existing value with the application ID (clientId) of the `IntegratedWebApp-AdvancedToken` copied from the Azure portal.
+2. Find the app key `ClientId` and replace the existing value with the application ID (clientId) of the `WebApp-SharedTokenCache` copied from the Azure portal.
 3. Find the app key `TenantId` and replace the value with the Tenant ID where you registered your application.
 4. Find the app key `Domain` and replace the existing value with your Azure AD tenant name.
-5. Find the app key `ClientSecret` and replace the existing value with the key you saved during the creation of the `IntegratedWebApp-AdvancedToken`, in the Azure portal.
+5. Find the app key `ClientSecret` and replace the existing value with the key you saved during the creation of the `WebApp-SharedTokenCache`, in the Azure portal.
 6. Find the section for the `ConnectionStrings` and replace the value of the keys that are relevant to your scenario:
    - If you will use **SQL Server**, update the key `TokenCacheDbConnStr` with the database connection string.
    - If you will use **Redis**, update the key `TokenCacheRedisConnStr` with the Redis connection string, and the key `TokenCacheRedisInstaceName` with the the Redis instance name.
@@ -243,9 +244,11 @@ services.AddStackExchangeRedisCache(options =>
     options.InstanceName = Configuration.GetConnectionString("TokenCacheRedisInstaceName");
 });
 ```
+
 And setup the Dependency Injection for the desired `IMsalAccountActivityStore` implementation. For instance:
 
 Save `MsalAccountActivity.cs` entity on SQL Server: 
+
 ```c#
 services.AddDbContext<IntegratedTokenCacheDbContext>(options =>
     options.UseSqlServer(Configuration.GetConnectionString("TokenCacheDbConnStr")));
