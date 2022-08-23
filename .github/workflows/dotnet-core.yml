@@ -16,7 +16,7 @@ jobs:
     - name: Setup .NET Core
       uses: actions/setup-dotnet@v1
       with:
-        dotnet-version: 3.1.301
+        dotnet-version: 6.0
     - name: Build 1-1-WebApp-BgWorker-WebApp
       run: dotnet build --configuration Release .\1-Integrated-Cache\1-1-WebApp-BgWorker\WebApp\WebApp.sln
     - name: Build 1-1-WebApp-BgWorker-BgWorker
