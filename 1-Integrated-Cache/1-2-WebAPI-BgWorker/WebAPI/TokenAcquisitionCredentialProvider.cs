@@ -22,8 +22,13 @@ namespace WebAPI
 
         public async Task AuthenticateRequestAsync(HttpRequestMessage request)
         {
-            request.Headers.Add("Authorization",
-                $"Bearer {await _tokenAcquisition.GetAccessTokenForUserAsync(_initialScopes)}");
+            var accessToken = await _tokenAcquisition.GetAccessTokenForUserAsync(_initialScopes,
+                tokenAcquisitionOptions: new TokenAcquisitionOptions()
+                {
+                    LongRunningWebApiSessionKey = TokenAcquisitionOptions.LongRunningWebApiSessionKeyAuto
+                });
+
+            request.Headers.Add("Authorization", $"Bearer {accessToken}");
         }
     }
 }
