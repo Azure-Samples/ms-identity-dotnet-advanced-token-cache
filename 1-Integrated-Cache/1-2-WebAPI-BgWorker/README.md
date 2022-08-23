@@ -165,7 +165,9 @@ Open the project in your IDE (like Visual Studio or Visual Studio Code) to confi
 1. In the **Register an application page** that appears, enter your application's registration information:
    - In the **Name** section, enter a meaningful application name that will be displayed to users of the app, for example `ProfileSPA-SharedTokenCache`.
    - Under **Supported account types**, select **Accounts in this organizational directory only**.
-   - In the **Redirect URI (optional)** section, select **Single-page application** in the combo-box and enter the following redirect URI: `http://localhost:3000`.
+   - In the **Redirect URI (optional)** section, select **Single-page application** in the combo-box and enter the following redirect URI(s): 
+      - `http://localhost:3000`
+      - `http://localhost:3000/redirect.html` 
 1. Select **Register** to create the application.
 1. In the app's registration screen, find and note the **Application (client) ID**. You use this value in your app's configuration file(s) later in your code.
 1. Select **Save** to save your changes.
@@ -189,7 +191,7 @@ Open the project in your IDE (like Visual Studio or Visual Studio Code) to confi
 
 > In the steps below, "ClientID" is the same as "Application ID" or "AppId".
 
-1. Open the `SPA\src\utils\authConfig.js` file
+1. Open the `SPA\src\authConfig.js` file
 1. Find the app key `clientId` and replace the existing value with the application ID (clientId) of the `ProfileSPA-SharedTokenCache` application copied from the Azure portal.
 1. Find the app key `authority` and replace the existing value with ('https://login.microsoftonline.com/'+ $tenantId).
 1. Find the app key `apiURI` and replace the existing value with the base address of the WebApi-SharedTokenCache project (by default `https://localhost:44351/api/profile`).

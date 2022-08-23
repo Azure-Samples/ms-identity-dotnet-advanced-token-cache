@@ -401,7 +401,7 @@ Function ConfigureApplications
    UpdateTextFile -configFilePath $configFile -dictionary $dictionary
 
    # Update config file for 'client'
-   $configFile = $pwd.Path + "\..\SPA\src\utils\authConfig.js"
+   $configFile = $pwd.Path + "\..\SPA\src\authConfig.js"
    Write-Host "Updating the sample code ($configFile)"
    $dictionary = @{ "Enter the Client Id (aka 'Application ID')" = $clientAadApplication.AppId;"Enter the Authority, e.g 'https://login.microsoftonline.com/{tid}'" = ('https://login.microsoftonline.com/'+ $tenantId);"Enter the API scopes as declared in the app registration 'Expose an Api' blade in the form of 'api://{client_id}/.default'" = ("api://"+$serviceAadApplication.AppId+"/.default");"Enter the WebAPI URI, e.g. 'https://localhost:44351/api/profile'" = $serviceAadApplication.HomePage };
    ReplaceInTextFile -configFilePath $configFile -dictionary $dictionary
