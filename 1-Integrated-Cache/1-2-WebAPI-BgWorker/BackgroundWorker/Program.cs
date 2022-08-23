@@ -7,6 +7,9 @@ using System;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.Identity.Web;
+using Microsoft.Identity.Web.TokenCacheProviders;
+using Microsoft.Identity.Web.TokenCacheProviders.Distributed;
+using Microsoft.Identity.Client;
 
 namespace BackgroundWorker
 {
@@ -34,6 +37,7 @@ namespace BackgroundWorker
                         options.DefaultSlidingExpiration = TimeSpan.FromHours(2);
 
                     })
+                    .AddSingleton<IMsalTokenCacheProvider, MsalDistributedTokenCacheAdapter>()
                     .AddDbContext<IntegratedTokenCacheDbContext>(options => options.UseSqlServer(config.TokenCacheDbConnStr))
                     .AddScoped<IMsalAccountActivityStore, SqlServerMsalAccountActivityStore>()
                     .BuildServiceProvider();
@@ -145,17 +149,12 @@ namespace BackgroundWorker
                 .WithAuthority(new Uri(config.Authority))
                 .Build();
 
-            return app.AddDistributedTokenCache(services => {
-                services.AddDistributedMemoryCache()
-                    .AddDistributedSqlServerCache(options =>
-                    {
-                        options.ConnectionString = config.TokenCacheDbConnStr;
-                        options.SchemaName = "dbo";
-                        options.TableName = "TokenCache";
-                        options.DefaultSlidingExpiration = TimeSpan.FromHours(2);
+            var msalCache = _serviceProvider.GetService<IMsalTokenCacheProvider>();
 
-                    });
-            }); ;
+            msalCache.Initialize(app.UserTokenCache);
+
+            return app;
         }
     }
 }
+
