@@ -4,6 +4,7 @@ import { InteractionType } from "@azure/msal-browser";
 
 import { loginRequest, protectedResources } from "../authConfig";
 import { callEndpointWithToken } from "../fetch";
+import { ProfileData } from "../components/DataDisplay";
 
 const ProfileContent = () => {
     /**
@@ -23,7 +24,7 @@ const ProfileContent = () => {
 
     return (
         <>
-            { profileData ? <ListView  profileData={profileData} /> : null }
+            { profileData ? <ProfileData  profileData={profileData} /> : null }
         </>
     );
 };
