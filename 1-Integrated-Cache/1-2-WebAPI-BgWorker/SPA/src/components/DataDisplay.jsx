@@ -4,7 +4,7 @@ import { createClaimsTable } from "../utils/claimUtils";
 import "../styles/App.css";
 
 export const ProfileData = (props) => {
-    const tableRows = Object.entries(props.graphData).map((entry, index) => {
+    const tableRows = Object.entries(props.profileData).map((entry, index) => {
         return (<tr key={index}>
             <td><b>{entry[0]}: </b></td>
             <td>{entry[1]}</td>
