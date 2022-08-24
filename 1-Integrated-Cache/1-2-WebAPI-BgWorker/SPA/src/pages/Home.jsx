@@ -27,7 +27,7 @@ const ProfileContent = () => {
 
     return (
         <>
-            { profileData && false ? <ProfileData  profileData={profileData} /> : <p className='data-area-div'>Retrieving user data from server...</p> }
+            { profileData ? <ProfileData  profileData={profileData} /> : <p className='data-area-div'>Retrieving user data from server...</p> }
         </>
     );
 };
