@@ -32,7 +32,6 @@ export const NavigationBar = () => {
 
     const handleLogoutRedirect = () => {
         let account = instance.getActiveAccount();
-        clearStorage(account);
 
         instance.logoutRedirect({
             account: instance.getActiveAccount(),
@@ -41,7 +40,6 @@ export const NavigationBar = () => {
 
     const handleLogoutPopup = () => {
         let account = instance.getActiveAccount();
-        clearStorage(account);
 
         instance.logoutPopup({
             mainWindowRedirectUri: '/', // redirects the top level app after logout
