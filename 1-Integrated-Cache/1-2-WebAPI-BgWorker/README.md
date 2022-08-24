@@ -21,13 +21,11 @@ description: An ASP.Net Core sample that shows how web APIs can share the token 
 
 * [Overview](#overview)
 * [Scenario](#scenario)
-* [Contents](#contents)
 * [Prerequisites](#prerequisites)
 * [Setup the sample](#setup-the-sample)
 * [Explore the sample](#explore-the-sample)
 * [Troubleshooting](#troubleshooting)
 * [About the code](#about-the-code)
-* [How to deploy this sample to Azure](#how-to-deploy-this-sample-to-azure)
 * [Next Steps](#next-steps)
 * [Contributing](#contributing)
 * [Learn More](#learn-more)
@@ -135,6 +133,8 @@ To manually register the apps, as a first step you'll need to:
     1. Select one of the available key durations (**6 months**, **12 months** or **Custom**) as per your security posture.
     1. The generated key value will be displayed when you select the **Add** button. Copy and save the generated value for use in later steps.
     1. You'll need this key later in your code's configuration files. This key value will not be displayed again, and is not retrievable by any other means, so make sure to note it from the Azure portal before navigating to any other screen or blade.
+    > :bulb: For enhanced security, instead of using client secrets, consider [using certificates](./README-use-certificate.md) and [Azure KeyVault](https://azure.microsoft.com/services/key-vault/#product-overview).    
+1. Since this app signs-in users, we will now proceed to select **delegated permissions**, which is is required by apps signing-in users.
    1. In the app's registration screen, select the **API permissions** blade in the left to open the page where we add access to the APIs that your application needs:
    1. Select the **Add a permission** button and then,
    1. Ensure that the **Microsoft APIs** tab is selected.
@@ -165,6 +165,14 @@ To manually register the apps, as a first step you'll need to:
 
     > :information_source:  Follow  [the principle of least privilege](https://docs.microsoft.com/azure/active-directory/develop/secure-least-privileged-access) whenever you are publishing permissions for a web API.
 
+##### Configure Optional Claims
+
+1. Still on the same app registration, select the **Token configuration** blade to the left.
+1. Select **Add optional claim**:
+    1. Select **optional claim type**, then choose **Access**.
+    1. Select the optional claim **idtyp**.
+    1. Select **Add** to save your changes.
+
 ##### Configure the service app (WebApi-SharedTokenCache) to use your app registration
 
 Open the project in your IDE (like Visual Studio or Visual Studio Code) to configure the code.
@@ -186,6 +194,13 @@ Open the project in your IDE (like Visual Studio or Visual Studio Code) to confi
     1. Under **Supported account types**, select **Accounts in this organizational directory only**
     1. Select **Register** to create the application.
 1. In the **Overview** blade, find and note the **Application (client) ID**. You use this value in your app's configuration file(s) later in your code.
+1. In the app's registration screen, select the **Authentication** blade to the left.
+1. If you don't have a platform added, select **Add a platform** and select the **Single-page application** option.
+    1. In the **Redirect URI** section enter the following redirect URIs:
+        1. `http://localhost:3000`
+        1. `http://localhost:3000/redirect.html`
+    1. Click **Save** to save your changes.
+
 1. Since this app signs-in users, we will now proceed to select **delegated permissions**, which is is required by apps signing-in users.
    1. In the app's registration screen, select the **API permissions** blade in the left to open the page where we add access to the APIs that your application needs:
    1. Select the **Add a permission** button and then:
