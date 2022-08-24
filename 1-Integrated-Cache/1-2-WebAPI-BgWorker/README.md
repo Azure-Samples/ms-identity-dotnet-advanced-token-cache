@@ -200,7 +200,6 @@ Open the project in your IDE (like Visual Studio or Visual Studio Code) to confi
         1. `http://localhost:3000`
         1. `http://localhost:3000/redirect.html`
     1. Click **Save** to save your changes.
-
 1. Since this app signs-in users, we will now proceed to select **delegated permissions**, which is is required by apps signing-in users.
    1. In the app's registration screen, select the **API permissions** blade in the left to open the page where we add access to the APIs that your application needs:
    1. Select the **Add a permission** button and then:
@@ -224,11 +223,11 @@ Open the project in your IDE (like Visual Studio or Visual Studio Code) to confi
 
 > In the steps below, "ClientID" is the same as "Application ID" or "AppId".
 
-1. Open the `SPA\src\utils\authConfig.js` file
+1. Open the `SPA\src\authConfig.js` file
 1. Find the app key `clientId` and replace the existing value with the application ID (clientId) of the `ProfileSPA-SharedTokenCache` application copied from the Azure portal.
 1. Find the app key `authority` and replace the existing value with ('https://login.microsoftonline.com/'+ $tenantId).
-1. Find the app key `apiURI` and replace the existing value with the base address of the WebApi-SharedTokenCache project (by default `https://localhost:44351/api/profile`).
-2. Find the app key `resourceScope` and replace the existing value with the `/.default` scope: `api://{client_id}/.default`. [Learn more about the /.default scope](https://docs.microsoft.com/azure/active-directory/develop/v2-permissions-and-consent#the-default-scope)
+1. Find the app key `protectedResources.endpoint` and replace the existing value with the base address of the WebApi-SharedTokenCache project (by default `https://localhost:44351/api/profile`).
+2. Find the app key `protectedResources.scopes` and replace the existing value with the `/.default` scope: `api://{client_id}/.default`. [Learn more about the /.default scope](https://docs.microsoft.com/azure/active-directory/develop/v2-permissions-and-consent#the-default-scope)
 
 #### Configure Known Client Applications for service (WebApi-SharedTokenCache)
 

@@ -1,4 +1,4 @@
-﻿
+ 
 [CmdletBinding()]
 param(
     [Parameter(Mandatory=$False, HelpMessage='Tenant ID (This is a GUID which represents the "Directory ID" of the AzureAD tenant into which you want to create the apps')]
@@ -328,7 +328,6 @@ Function ConfigureApplications
     $servicePortalUrl = "https://portal.azure.com/#blade/Microsoft_AAD_RegisteredApps/ApplicationMenuBlade/CallAnAPI/appId/"+$serviceAadApplication.AppId+"/objectId/"+$serviceAadApplication.Id+"/isMSAApp/"
     Add-Content -Value "<tr><td>service</td><td>$currentAppId</td><td><a href='$servicePortalUrl'>WebApi-SharedTokenCache</a></td></tr>" -Path createdApps.html
     $requiredResourcesAccess = New-Object System.Collections.Generic.List[Microsoft.Graph.PowerShell.Models.MicrosoftGraphRequiredResourceAccess]
-
     
     # Add Required Resources Access (from 'service' to 'Microsoft Graph')
     Write-Host "Getting access from 'service' to 'Microsoft Graph'"
@@ -347,7 +346,7 @@ Function ConfigureApplications
    $clientAadApplication = New-MgApplication -DisplayName "ProfileSPA-SharedTokenCache" `
                                                       -Spa `
                                                       @{ `
-                                                          RedirectUris = "http://localhost:3000"; `
+                                                          RedirectUris = "http://localhost:3000", "http://localhost:3000/redirect.html"; `
                                                         } `
                                                        -SignInAudience AzureADMyOrg `
                                                       #end of command
@@ -372,7 +371,6 @@ Function ConfigureApplications
     $clientPortalUrl = "https://portal.azure.com/#blade/Microsoft_AAD_RegisteredApps/ApplicationMenuBlade/CallAnAPI/appId/"+$clientAadApplication.AppId+"/objectId/"+$clientAadApplication.Id+"/isMSAApp/"
     Add-Content -Value "<tr><td>client</td><td>$currentAppId</td><td><a href='$clientPortalUrl'>ProfileSPA-SharedTokenCache</a></td></tr>" -Path createdApps.html
     $requiredResourcesAccess = New-Object System.Collections.Generic.List[Microsoft.Graph.PowerShell.Models.MicrosoftGraphRequiredResourceAccess]
-
     
     # Add Required Resources Access (from 'client' to 'Microsoft Graph')
     Write-Host "Getting access from 'client' to 'Microsoft Graph'"
@@ -408,7 +406,7 @@ Function ConfigureApplications
     UpdateTextFile -configFilePath $configFile -dictionary $dictionary
     
     # Update config file for 'client'
-    $configFile = $pwd.Path + "\..\SPA\src\utils\authConfig.js"
+    $configFile = $pwd.Path + "\..\SPA\src\authConfig.js"
     $dictionary = @{ "Enter the Client Id (aka 'Application ID')" = $clientAadApplication.AppId;"Enter the Authority, e.g 'https://login.microsoftonline.com/{tid}'" = ('https://login.microsoftonline.com/'+ $tenantId);"Enter the API scopes as declared in the app registration 'Expose an Api' blade in the form of 'api://{client_id}/.default'" = ("api://"+$serviceAadApplication.AppId+"/.default");"Enter the WebAPI URI, e.g. 'https://localhost:44351/api/profile'" = $serviceAadApplication.Web.HomePageUrl };
 
     Write-Host "Updating the sample code ($configFile)"
@@ -427,9 +425,6 @@ Function ConfigureApplications
     Write-Host "- For service"
     Write-Host "  - Navigate to $servicePortalUrl"
     Write-Host "  - Please follow through the manual steps outlined in 'Step 3: Register the Background Worker project with your Azure AD tenant' of the README.MD" -ForegroundColor Red 
-    Write-Host "- For client"
-    Write-Host "  - Navigate to $clientPortalUrl"
-    Write-Host "  - Navigate to the Manifest page, find the 'replyUrlsWithType' section and change the type of redirect URI to 'Spa'" -ForegroundColor Red 
     Write-Host -ForegroundColor Green "------------------------------------------------------------------------------------------------" 
        if($isOpenSSL -eq 'Y')
     {
@@ -439,7 +434,7 @@ Function ConfigureApplications
         Write-Host -ForegroundColor Green "------------------------------------------------------------------------------------------------" 
     }
     Add-Content -Value "</tbody></table></body></html>" -Path createdApps.html  
-}
+} # end of ConfigureApplications function
 
 # Pre-requisites
 if ($null -eq (Get-Module -ListAvailable -Name "Microsoft.Graph.Applications")) {

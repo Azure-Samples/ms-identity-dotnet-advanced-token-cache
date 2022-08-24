@@ -48,9 +48,9 @@
           "DelegatedPermissions": [ "User.Read" ]
         },
         {
-					"Resource": "service",
+          "Resource": "service",
           "DelegatedPermissions": [ "Profile.Read", "Profile.ReadWrite" ]
-				}
+        }
       ]
     }
   ],
@@ -81,7 +81,7 @@
     {
       "App": "client",
       "SettingKind": "Replace",
-      "SettingFile": "\\..\\SPA\\src\\utils\\authConfig.js",
+      "SettingFile": "\\..\\SPA\\src\\authConfig.js",
       "Mappings": [
         {
           "key": "Enter the Client Id (aka 'Application ID')",
