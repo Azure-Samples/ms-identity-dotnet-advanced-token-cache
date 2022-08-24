@@ -63,8 +63,11 @@ export const NavigationBar = () => {
                     Microsoft identity platform
                 </a>
                 <AuthenticatedTemplate>
-                    <Nav.Link className="navbarButton" href="/profile">
-                        Profile
+                    <Nav.Link className="navbarButton" href="/">
+                        Home
+                    </Nav.Link>
+                    <Nav.Link className="navbarButton" href="/id-token">
+                        ID Token
                     </Nav.Link>
                     <div className="collapse navbar-collapse justify-content-end">
                         <DropdownButton

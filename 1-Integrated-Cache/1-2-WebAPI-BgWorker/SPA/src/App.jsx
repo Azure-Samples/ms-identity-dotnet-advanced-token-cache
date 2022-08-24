@@ -4,14 +4,14 @@ import { MsalProvider } from "@azure/msal-react";
 
 import { PageLayout } from "./components/PageLayout";
 import { Home } from "./pages/Home";
-import { Profile } from "./pages/Profile";
+import { IdToken } from "./pages/IdToken";
 
 import "./styles/App.css";
 
 const Pages = () => {
     return (
         <Routes>
-            <Route path="/profile" element={<Profile />} />
+            <Route path="/id-token" element={<IdToken />} />
             <Route path="/" element={<Home />} />
         </Routes>
     )

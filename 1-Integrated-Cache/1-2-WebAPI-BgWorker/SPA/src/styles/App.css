@@ -17,7 +17,8 @@ footer {
 }
 
 .navbarButton {
-  color: #fff !important
+  color: #fff !important;
+  padding: .5rem 1rem !important;
 }
 
 .data-area-div {

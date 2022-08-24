@@ -12,7 +12,7 @@ export const PageLayout = (props) => {
         <>
             <NavigationBar />
             <br />
-            <h5><center>Welcome to the Microsoft Authentication Library For React Tutorial</center></h5>
+            <h5><center>User data retrieved from Microsoft Graph with server-side access token.</center></h5>
             <br />
             {props.children}
             <br />
