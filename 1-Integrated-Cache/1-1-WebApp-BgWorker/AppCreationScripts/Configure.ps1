@@ -1,4 +1,4 @@
-﻿
+ 
 [CmdletBinding()]
 param(
     [Parameter(Mandatory=$False, HelpMessage='Tenant ID (This is a GUID which represents the "Directory ID" of the AzureAD tenant into which you want to create the apps')]
@@ -187,7 +187,6 @@ Function ConfigureApplications
     $webAppPortalUrl = "https://portal.azure.com/#blade/Microsoft_AAD_RegisteredApps/ApplicationMenuBlade/CallAnAPI/appId/"+$webAppAadApplication.AppId+"/objectId/"+$webAppAadApplication.Id+"/isMSAApp/"
     Add-Content -Value "<tr><td>webApp</td><td>$currentAppId</td><td><a href='$webAppPortalUrl'>WebApp-SharedTokenCache</a></td></tr>" -Path createdApps.html
     $requiredResourcesAccess = New-Object System.Collections.Generic.List[Microsoft.Graph.PowerShell.Models.MicrosoftGraphRequiredResourceAccess]
-
     
     # Add Required Resources Access (from 'webApp' to 'Microsoft Graph')
     Write-Host "Getting access from 'webApp' to 'Microsoft Graph'"
@@ -228,7 +227,7 @@ Function ConfigureApplications
         Write-Host -ForegroundColor Green "------------------------------------------------------------------------------------------------" 
     }
     Add-Content -Value "</tbody></table></body></html>" -Path createdApps.html  
-}
+} # end of ConfigureApplications function
 
 # Pre-requisites
 if ($null -eq (Get-Module -ListAvailable -Name "Microsoft.Graph.Applications")) {
