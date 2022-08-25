@@ -16,10 +16,10 @@ namespace WebAPI.Services
         /// <param name="initialScopes">Initial scopes.</param>
         /// <param name="graphBaseUrlKey">Base URL for Microsoft graph. This can be
         /// changed for instance for applications running in national clouds</param>
-        public static void AddMicrosoftGraph(this IServiceCollection services,
-                                             IConfiguration configuration,
-                                             IEnumerable<string> initialScopes,
-                                             string graphBaseUrlKey = "MicrosoftGraphBaseUrl")
+        public static void AddCustomMicrosoftGraphClient(this IServiceCollection services,
+                                                        IConfiguration configuration,
+                                                        IEnumerable<string> initialScopes = null,
+                                                        string graphBaseUrlKey = "MicrosoftGraphBaseUrl")
         {
             // Graph base URL
             string graphBaseUrl = configuration.GetValue<string>(graphBaseUrlKey);
@@ -27,10 +27,11 @@ namespace WebAPI.Services
             services.AddTokenAcquisition(true);
             services.AddSingleton<GraphServiceClient, GraphServiceClient>(serviceProvider =>
             {
+                var scopes = initialScopes ?? new string[] { "https://graph.microsoft.com/.default" };
                 var tokenAquisitionService = serviceProvider.GetService<ITokenAcquisition>();
                 GraphServiceClient client = string.IsNullOrWhiteSpace(graphBaseUrl) ?
-                            new GraphServiceClient(new TokenAcquisitionCredentialProvider(tokenAquisitionService, initialScopes)) :
-                            new GraphServiceClient(graphBaseUrl, new TokenAcquisitionCredentialProvider(tokenAquisitionService, initialScopes));
+                            new GraphServiceClient(new TokenAcquisitionCredentialProvider(tokenAquisitionService, scopes)) :
+                            new GraphServiceClient(graphBaseUrl, new TokenAcquisitionCredentialProvider(tokenAquisitionService, scopes));
                 return client;
             });
         }

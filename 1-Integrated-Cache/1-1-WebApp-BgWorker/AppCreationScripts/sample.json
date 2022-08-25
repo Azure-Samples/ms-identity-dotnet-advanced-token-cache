@@ -5,7 +5,11 @@
     "Client": "ASP.NET Core Web App",
     "Service": "Microsoft Graph",
     "RepositoryUrl": "ms-identity-dotnet-advanced-token-cache",
-    "Endpoint": "AAD v2.0"
+    "Endpoint": "AAD v2.0",
+    "name": "Sharing the MSAL token cache between a web app and a background console worker app",
+    "Description": "This sample demonstrates how to share the MSAL token cache between a web app and a background console worker app and continue to act on-behalf of users in their absence.",
+    "Languages": [ "csharp" ],
+    "Products": [ "aspnet-core", "azure-active-directory", "microsoft-identity-web","microsoft-graph-api" ]
   },
 
   /*

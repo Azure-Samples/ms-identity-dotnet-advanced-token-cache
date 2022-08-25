@@ -1,15 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Graph;
-using Microsoft.Identity.Web;
 using Microsoft.Identity.Web.Resource;
 using Newtonsoft.Json;
-using WebAPI.Services;
 
 namespace WebAPI.Controllers
 {
@@ -22,7 +16,7 @@ namespace WebAPI.Controllers
         /// The Web API will only accept tokens 1) for users, and 
         /// 2) having the access_as_user scope for this API
         /// </summary>
-        static readonly string[] scopeRequiredByApi = new string[] { "access_as_user" };
+        //static readonly string[] scopeRequiredByApi = new string[] { "access_as_user" };
         private readonly GraphServiceClient _graphServiceClient;
 
         public ProfileController(GraphServiceClient graphServiceClient)
@@ -35,24 +29,24 @@ namespace WebAPI.Controllers
         /// </summary>
         /// <returns></returns>
         [HttpGet]
+        [RequiredScopeOrAppPermission(
+            AcceptedScope = new string[] { "Profile.Read", "Profile.ReadWrite" })]
         public async Task<string> Get()
         {
-            HttpContext.VerifyUserHasAnyAcceptedScope(scopeRequiredByApi);
+            //HttpContext.VerifyUserHasAnyAcceptedScope(scopeRequiredByApi);
 
-            var userProfile = await _graphServiceClient.Me
+            User userProfile = await _graphServiceClient.Me
                                     .Request()
-                                    .Select(x => new 
-                                    { 
-                                        x.Country,
-                                        x.City,
-                                        x.EmployeeId,
-                                        x.DisplayName,
-                                        x.GivenName,
-                                        x.Department
-                                    })
                                     .GetAsync();
 
-            return JsonConvert.SerializeObject(userProfile);
+            return JsonConvert.SerializeObject(new {
+                country = userProfile.Country,
+                city = userProfile.City,
+                employeeId = userProfile.EmployeeId,
+                displayName = userProfile.DisplayName,
+                givenName = userProfile.GivenName,
+                department = userProfile.Department,
+            });
         }
 
     }

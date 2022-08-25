@@ -1,4 +1,4 @@
-# Registering sample apps with the Microsoft identity platform and updating the configuration files using PowerShell
+# Registering sample apps with the Microsoft identity platform and updating configuration files using PowerShell
 
 ## Overview
 
@@ -15,7 +15,7 @@
 
    ```PowerShell
    cd .\AppCreationScripts\
-   .\Configure.ps1
+   .\Configure.ps1 -TenantId "your test tenant's id" -AzureEnvironmentName "[Optional] - Azure environment, defaults to 'Global'"
    ```
 
 ### More details
@@ -28,9 +28,7 @@
   - [Run the script and start running](#run-the-script-and-start-running)
   - [Four ways to run the script](#four-ways-to-run-the-script)
     - [Option 1 (interactive)](#option-1-interactive)
-    - [Option 2 (non-interactive)](#option-2-non-interactive)
-    - [Option 3 (Interactive, but create apps in a specified tenant)](#option-3-Interactive-but-create-apps-in-a-specified-tenant)
-    - [Option 4 (non-interactive, and create apps in a specified tenant)](#option-4-non-interactive-and-create-apps-in-a-specified-tenant)
+    - [Option 2 (Interactive, but create apps in a specified tenant)](#option-3-Interactive-but-create-apps-in-a-specified-tenant)
   - [Running the script on Azure Sovereign clouds](#running-the-script-on-Azure-Sovereign-clouds)
 
 ## Goal of the provided scripts
@@ -42,7 +40,7 @@ This sample comes with two PowerShell scripts, which automate the creation of th
 These scripts are:
 
 - `Configure.ps1` which:
-  - creates Azure AD applications and their related objects (permissions, dependencies, secrets),
+  - creates Azure AD applications and their related objects (permissions, dependencies, secrets, app roles),
   - changes the configuration files in the sample projects.
   - creates a summary file named `createdApps.html` in the folder from which you ran the script, and containing, for each Azure AD application it created:
     - the identifier of the application
@@ -67,23 +65,23 @@ The `Configure.ps1` will stop if it tries to create an Azure AD application whic
     Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope Process
     ```
 
-### (Optionally) install AzureAD PowerShell modules
+### (Optionally) install Microsoft.Graph.Applications PowerShell modules
 
-The scripts install the required PowerShell module (AzureAD) for the current user if needed. However, if you want to install if for all users on the machine, you can follow the following steps:
+The scripts install the required PowerShell module (Microsoft.Graph.Applications) for the current user if needed. However, if you want to install if for all users on the machine, you can follow the following steps:
 
-1. If you have never done it already, in the PowerShell window, install the AzureAD PowerShell modules. For this:
+1. If you have never done it already, in the PowerShell window, install the Microsoft.Graph.Applications PowerShell modules. For this:
 
    1. Open PowerShell as admin (On Windows, Search Powershell in the search bar, right click on it and select **Run as administrator**).
    2. Type:
 
       ```PowerShell
-      Install-Module AzureAD
+      Install-Module Microsoft.Graph.Applications
       ```
 
       or if you cannot be administrator on your machine, run:
 
       ```PowerShell
-      Install-Module AzureAD -Scope CurrentUser
+      Install-Module Microsoft.Graph.Applications -Scope CurrentUser
       ```
 
 ### Run the script and start running
@@ -100,14 +98,12 @@ The scripts install the required PowerShell module (AzureAD) for the current use
 
 You're done!
 
-### Four ways to run the script
+### Two ways to run the script
 
 We advise four ways of running the script:
 
 - Interactive: you will be prompted for credentials, and the scripts decide in which tenant to create the objects,
-- non-interactive: you will provide credentials, and the scripts decide in which tenant to create the objects,
 - Interactive in specific tenant: you will provide the tenant in which you want to create the objects and then you will be prompted for credentials, and the scripts will create the objects,
-- non-interactive in specific tenant: you will provide the tenant in which you want to create the objects and credentials, and the scripts will create the objects.
 
 Here are the details on how to do this.
 
@@ -118,20 +114,7 @@ Here are the details on how to do this.
 
 Note that the script will choose the tenant in which to create the applications, based on the user. Also to run the `Cleanup.ps1` script, you will need to re-sign-in.
 
-#### Option 2 (non-interactive)
-
-When you know the identity and credentials of the user in the name of whom you want to create the applications, you can use the non-interactive approach. It's more adapted to DevOps. Here is an example of script you'd want to run in a PowerShell Window
-
-```PowerShell
-$secpasswd = ConvertTo-SecureString "[Password here]" -AsPlainText -Force
-$mycreds = New-Object System.Management.Automation.PSCredential ("[login@tenantName here]", $secpasswd)
-. .\Cleanup.ps1 -Credential $mycreds
-. .\Configure.ps1 -Credential $mycreds
-```
-
-Of course, in real life, you might already get the password as a `SecureString`. You might also want to get the password from **Azure Key Vault**.
-
-#### Option 3 (Interactive, but create apps in a specified tenant)
+#### Option 2 (Interactive, but create apps in a specified tenant)
 
   if you want to create the apps in a particular tenant, you can use the following option:
   
@@ -147,18 +130,6 @@ $tenantId = "yourTenantIdGuid"
 . .\Configure.ps1 -TenantId $tenantId
 ```
 
-#### Option 4 (non-interactive, and create apps in a specified tenant)
-
-This option combines option 2 and option 3: it creates the application in a specific tenant. See option 3 for the way to get the tenant Id. Then run:
-
-```PowerShell
-$secpasswd = ConvertTo-SecureString "[Password here]" -AsPlainText -Force
-$mycreds = New-Object System.Management.Automation.PSCredential ("[login@tenantName here]", $secpasswd)
-$tenantId = "yourTenantIdGuid"
-. .\Cleanup.ps1 -Credential $mycreds -TenantId $tenantId
-. .\Configure.ps1 -Credential $mycreds -TenantId $tenantId
-```
-
 ### Running the script on Azure Sovereign clouds
 
 All the four options listed above can be used on any Azure Sovereign clouds. By default, the script targets `AzureCloud`, but it can be changed using the parameter `-AzureEnvironmentName`.
@@ -168,11 +139,10 @@ The acceptable values for this parameter are:
 - AzureCloud
 - AzureChinaCloud
 - AzureUSGovernment
-- AzureGermanyCloud
 
 Example:
 
  ```PowerShell
- . .\Cleanup.ps1 -AzureEnvironmentName "AzureGermanyCloud"
- . .\Configure.ps1 -AzureEnvironmentName "AzureGermanyCloud"
+ . .\Cleanup.ps1 -AzureEnvironmentName "AzureUSGovernment"
+ . .\Configure.ps1 -AzureEnvironmentName "AzureUSGovernment"
  ```
