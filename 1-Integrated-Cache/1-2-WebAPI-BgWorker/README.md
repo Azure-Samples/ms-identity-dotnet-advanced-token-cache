@@ -313,7 +313,7 @@ Once `npm install` is completed, you can run the SPA with the command:
 npm start
 ```
 
-Open the SPA in either different browsers or use the same browser but in incognito mode, sign-in with multiple users and click on the **Call Web API** button.
+Open the SPA in either different browsers or use the same browser but in incognito mode, sign-in with multiple users and click on the **Profile** button on top.
 
 Once you have signed-in with at least 2 users you can stop both SPA and WebAPI projects, and execute the BackgroundWorker project.
 
